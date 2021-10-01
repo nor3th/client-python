@@ -70,7 +70,8 @@ class OpenCTIStix2Splitter:
 
         self.elements.sort(key=by_dep_size)
         for entity in self.elements:
-            bundles.append(self.stix2_create_bundle([entity], use_json, event_version))
+            bundles.append(
+                self.stix2_create_bundle([entity], use_json, event_version))
         return bundles
 
     @staticmethod

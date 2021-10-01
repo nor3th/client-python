@@ -60,9 +60,10 @@ class OpenCTIApiConnector:
                 }
             }
            """
-        result = self.api.query(
-            query, {"id": connector_id, "state": json.dumps(connector_state)}
-        )
+        result = self.api.query(query, {
+            "id": connector_id,
+            "state": json.dumps(connector_state)
+        })
         return result["data"]["pingConnector"]
 
     def register(self, connector: OpenCTIConnector) -> Dict:

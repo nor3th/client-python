@@ -12,7 +12,8 @@ class ConnectorType(Enum):
     INTERNAL_IMPORT_FILE = (
         "INTERNAL_IMPORT_FILE"  # From OpenCTI file system to OpenCTI stix2
     )
-    INTERNAL_ENRICHMENT = "INTERNAL_ENRICHMENT"  # From OpenCTI stix2 to OpenCTI stix2
+    # From OpenCTI stix2 to OpenCTI stix2
+    INTERNAL_ENRICHMENT = "INTERNAL_ENRICHMENT"
     INTERNAL_EXPORT_FILE = (
         "INTERNAL_EXPORT_FILE"  # From OpenCTI stix2 to OpenCTI file system
     )

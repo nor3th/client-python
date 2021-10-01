@@ -3,32 +3,28 @@ import time
 from typing import Dict, List
 
 from dateutil.parser import parse
-from pycti import OpenCTIApiConnector, OpenCTIApiClient, OpenCTIApiWork
+
+from pycti import OpenCTIApiClient, OpenCTIApiConnector, OpenCTIApiWork
 
 
 def get_incident_start_date():
-    return (
-        parse("2019-12-01")
-        .replace(tzinfo=datetime.timezone.utc)
-        .isoformat(sep="T", timespec="milliseconds")
-        .replace("+00:00", "Z")
-    )
+    return (parse("2019-12-01").replace(
+        tzinfo=datetime.timezone.utc).isoformat(
+            sep="T", timespec="milliseconds").replace("+00:00", "Z"))
 
 
 def get_incident_end_date():
-    return (
-        parse("2021-12-01")
-        .replace(tzinfo=datetime.timezone.utc)
-        .isoformat(sep="T", timespec="milliseconds")
-        .replace("+00:00", "Z")
-    )
+    return (parse("2021-12-01").replace(
+        tzinfo=datetime.timezone.utc).isoformat(
+            sep="T", timespec="milliseconds").replace("+00:00", "Z"))
 
 
 def read_marking(api_client: OpenCTIApiClient, tlp_id: int):
     return api_client.marking_definition.read(id=tlp_id)
 
 
-def get_connector_id(connector_name: str, api_connector: OpenCTIApiConnector) -> str:
+def get_connector_id(connector_name: str,
+                     api_connector: OpenCTIApiConnector) -> str:
     connector_list = api_connector.list()
     connector_id = ""
     for connector in connector_list:
@@ -57,7 +53,8 @@ def get_new_work_id(api_client: OpenCTIApiClient, connector_id: str) -> str:
     return new_works[0]["id"]
 
 
-def compare_values(original_data: Dict, retrieved_data: Dict, exception_keys: List):
+def compare_values(original_data: Dict, retrieved_data: Dict,
+                   exception_keys: List):
     for key, value in original_data.items():
         # Attributes which aren't present in the final Stix objects
         if key in exception_keys:
@@ -71,7 +68,8 @@ def compare_values(original_data: Dict, retrieved_data: Dict, exception_keys: Li
                 value == compare_data
             ), f"Key '{key}': '{value}' does't match value '{retrieved_data[key]}' ({retrieved_data}"
         elif key == "objects" and isinstance(value, list):
-            assert isinstance(compare_data, list), f"Key '{key}': is not a list"
+            assert isinstance(compare_data,
+                              list), f"Key '{key}': is not a list"
             original_ids = set()
             for elem in value:
                 if isinstance(elem, dict):

@@ -1,15 +1,15 @@
 # coding: utf-8
+import base64
 import datetime
 import io
 import json
 import logging
-import base64
 from typing import Union
 
 import magic
-from pythonjsonlogger import jsonlogger
 import requests
 import urllib3
+from pythonjsonlogger import jsonlogger
 
 from pycti.api.opencti_api_connector import OpenCTIApiConnector
 from pycti.api.opencti_api_work import OpenCTIApiWork
@@ -53,7 +53,8 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class CustomJsonFormatter(jsonlogger.JsonFormatter):
     def add_fields(self, log_record, record, message_dict):
-        super(CustomJsonFormatter, self).add_fields(log_record, record, message_dict)
+        super(CustomJsonFormatter, self).add_fields(log_record, record,
+                                                    message_dict)
         if not log_record.get("timestamp"):
             # This doesn't use record.created, so it is slightly off
             now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -123,10 +124,11 @@ class OpenCTIApiClient:
             log_handler = logging.StreamHandler()
             log_handler.setLevel(self.log_level.upper())
             formatter = CustomJsonFormatter(
-                "%(timestamp)s %(level)s %(name)s %(message)s"
-            )
+                "%(timestamp)s %(level)s %(name)s %(message)s")
             log_handler.setFormatter(formatter)
-            logging.basicConfig(handlers=[log_handler], level=numeric_level, force=True)
+            logging.basicConfig(handlers=[log_handler],
+                                level=numeric_level,
+                                force=True)
         else:
             logging.basicConfig(level=numeric_level)
 
@@ -147,15 +149,15 @@ class OpenCTIApiClient:
         self.external_reference = ExternalReference(self, File)
         self.kill_chain_phase = KillChainPhase(self)
         self.opencti_stix_object_or_stix_relationship = StixObjectOrStixRelationship(
-            self
-        )
+            self)
         self.stix = Stix(self)
         self.stix_domain_object = StixDomainObject(self, File)
         self.stix_core_object = StixCoreObject(self, File)
         self.stix_cyber_observable = StixCyberObservable(self, File)
         self.stix_core_relationship = StixCoreRelationship(self)
         self.stix_sighting_relationship = StixSightingRelationship(self)
-        self.stix_cyber_observable_relationship = StixCyberObservableRelationship(self)
+        self.stix_cyber_observable_relationship = StixCyberObservableRelationship(
+            self)
         self.identity = Identity(self)
         self.location = Location(self)
         self.threat_actor = ThreatActor(self)
@@ -185,8 +187,7 @@ class OpenCTIApiClient:
 
     def set_retry_number(self, retry_number):
         self.request_headers["opencti-retry-number"] = (
-            "" if retry_number is None else str(retry_number)
-        )
+            "" if retry_number is None else str(retry_number))
 
     def query(self, query, variables={}):
         """submit a query to the OpenCTI GraphQL API
@@ -208,13 +209,14 @@ class OpenCTIApiClient:
         for key in var_keys:
             val = variables[key]
             is_file = type(val) is File
-            is_files = (
-                isinstance(val, list)
-                and len(val) > 0
-                and all(map(lambda x: isinstance(x, File), val))
-            )
+            is_files = (isinstance(val, list) and len(val) > 0
+                        and all(map(lambda x: isinstance(x, File), val)))
             if is_file or is_files:
-                files_vars.append({"key": key, "file": val, "multiple": is_files})
+                files_vars.append({
+                    "key": key,
+                    "file": val,
+                    "multiple": is_files
+                })
                 query_var[key] = None if is_file else [None] * len(val)
             else:
                 query_var[key] = val
@@ -222,7 +224,10 @@ class OpenCTIApiClient:
         # If yes, transform variable (file to null) and create multipart query
         if len(files_vars) > 0:
             multipart_data = {
-                "operations": json.dumps({"query": query, "variables": query_var})
+                "operations": json.dumps({
+                    "query": query,
+                    "variables": query_var
+                })
             }
             # Build the multipart map
             map_index = 0
@@ -233,7 +238,9 @@ class OpenCTIApiClient:
                 if is_multiple_files:
                     # [(var_name + "." + i)] if is_multiple_files else
                     for _ in file_var_item["file"]:
-                        file_vars[str(map_index)] = [(var_name + "." + str(map_index))]
+                        file_vars[str(map_index)] = [
+                            (var_name + "." + str(map_index))
+                        ]
                         map_index += 1
                 else:
                     file_vars[str(map_index)] = [var_name]
@@ -267,7 +274,8 @@ class OpenCTIApiClient:
                     if isinstance(files.data, str):
                         file_multi = (
                             str(file_index),
-                            (files.name, io.BytesIO(files.data.encode()), files.mime),
+                            (files.name, io.BytesIO(files.data.encode()),
+                             files.mime),
                         )
                     else:
                         file_multi = (
@@ -289,7 +297,10 @@ class OpenCTIApiClient:
         else:
             r = self.session.post(
                 self.api_url,
-                json={"query": query, "variables": variables},
+                json={
+                    "query": query,
+                    "variables": variables
+                },
                 headers=self.request_headers,
                 verify=self.ssl_verify,
                 proxies=self.proxies,
@@ -299,21 +310,20 @@ class OpenCTIApiClient:
             result = r.json()
             if "errors" in result:
                 main_error = result["errors"][0]
-                error_name = (
-                    main_error["name"]
-                    if "name" in main_error
-                    else main_error["message"]
-                )
+                error_name = (main_error["name"] if "name" in main_error else
+                              main_error["message"])
                 if "data" in main_error and "reason" in main_error["data"]:
                     logging.error(main_error["data"]["reason"])
-                    raise ValueError(
-                        {"name": error_name, "message": main_error["data"]["reason"]}
-                    )
+                    raise ValueError({
+                        "name": error_name,
+                        "message": main_error["data"]["reason"]
+                    })
                 else:
                     logging.error(main_error["message"])
-                    raise ValueError(
-                        {"name": error_name, "message": main_error["message"]}
-                    )
+                    raise ValueError({
+                        "name": error_name,
+                        "message": main_error["message"]
+                    })
             else:
                 return result
         else:
@@ -432,7 +442,9 @@ class OpenCTIApiClient:
         else:
             return False
 
-    def process_multiple(self, data: dict, with_pagination=False) -> Union[dict, list]:
+    def process_multiple(self,
+                         data: dict,
+                         with_pagination=False) -> Union[dict, list]:
         """processes data returned by the OpenCTI API with multiple entities
 
         :param data: data to process
@@ -446,9 +458,8 @@ class OpenCTIApiClient:
             result = []
         if data is None:
             return result
-        for edge in (
-            data["edges"] if "edges" in data and data["edges"] is not None else []
-        ):
+        for edge in (data["edges"]
+                     if "edges" in data and data["edges"] is not None else []):
             row = edge["node"]
             if with_pagination:
                 result["entities"].append(self.process_multiple_fields(row))
@@ -489,26 +500,27 @@ class OpenCTIApiClient:
             data["createdById"] = data["createdBy"]["id"]
             if "objectMarking" in data["createdBy"]:
                 data["createdBy"]["objectMarking"] = self.process_multiple(
-                    data["createdBy"]["objectMarking"]
-                )
-                data["createdBy"]["objectMarkingIds"] = self.process_multiple_ids(
-                    data["createdBy"]["objectMarking"]
-                )
+                    data["createdBy"]["objectMarking"])
+                data["createdBy"][
+                    "objectMarkingIds"] = self.process_multiple_ids(
+                        data["createdBy"]["objectMarking"])
             if "objectLabel" in data["createdBy"]:
                 data["createdBy"]["objectLabel"] = self.process_multiple(
-                    data["createdBy"]["objectLabel"]
-                )
-                data["createdBy"]["objectLabelIds"] = self.process_multiple_ids(
-                    data["createdBy"]["objectLabel"]
-                )
+                    data["createdBy"]["objectLabel"])
+                data["createdBy"][
+                    "objectLabelIds"] = self.process_multiple_ids(
+                        data["createdBy"]["objectLabel"])
         else:
             data["createdById"] = None
         if "objectMarking" in data:
-            data["objectMarking"] = self.process_multiple(data["objectMarking"])
-            data["objectMarkingIds"] = self.process_multiple_ids(data["objectMarking"])
+            data["objectMarking"] = self.process_multiple(
+                data["objectMarking"])
+            data["objectMarkingIds"] = self.process_multiple_ids(
+                data["objectMarking"])
         if "objectLabel" in data:
             data["objectLabel"] = self.process_multiple(data["objectLabel"])
-            data["objectLabelIds"] = self.process_multiple_ids(data["objectLabel"])
+            data["objectLabelIds"] = self.process_multiple_ids(
+                data["objectLabel"])
         if "reports" in data:
             data["reports"] = self.process_multiple(data["reports"])
             data["reportsIds"] = self.process_multiple_ids(data["reports"])
@@ -519,36 +531,35 @@ class OpenCTIApiClient:
             data["opinions"] = self.process_multiple(data["opinions"])
             data["opinionsIds"] = self.process_multiple_ids(data["opinions"])
         if "killChainPhases" in data:
-            data["killChainPhases"] = self.process_multiple(data["killChainPhases"])
+            data["killChainPhases"] = self.process_multiple(
+                data["killChainPhases"])
             data["killChainPhasesIds"] = self.process_multiple_ids(
-                data["killChainPhases"]
-            )
+                data["killChainPhases"])
         if "externalReferences" in data:
             data["externalReferences"] = self.process_multiple(
-                data["externalReferences"]
-            )
+                data["externalReferences"])
             data["externalReferencesIds"] = self.process_multiple_ids(
-                data["externalReferences"]
-            )
+                data["externalReferences"])
         if "objects" in data:
             data["objects"] = self.process_multiple(data["objects"])
             data["objectsIds"] = self.process_multiple_ids(data["objects"])
         if "observables" in data:
             data["observables"] = self.process_multiple(data["observables"])
-            data["observablesIds"] = self.process_multiple_ids(data["observables"])
+            data["observablesIds"] = self.process_multiple_ids(
+                data["observables"])
         if "stixCoreRelationships" in data:
             data["stixCoreRelationships"] = self.process_multiple(
-                data["stixCoreRelationships"]
-            )
+                data["stixCoreRelationships"])
             data["stixCoreRelationshipsIds"] = self.process_multiple_ids(
-                data["stixCoreRelationships"]
-            )
+                data["stixCoreRelationships"])
         if "indicators" in data:
             data["indicators"] = self.process_multiple(data["indicators"])
-            data["indicatorsIds"] = self.process_multiple_ids(data["indicators"])
+            data["indicatorsIds"] = self.process_multiple_ids(
+                data["indicators"])
         if "importFiles" in data:
             data["importFiles"] = self.process_multiple(data["importFiles"])
-            data["importFilesIds"] = self.process_multiple_ids(data["importFiles"])
+            data["importFilesIds"] = self.process_multiple_ids(
+                data["importFiles"])
         return data
 
     def upload_file(self, **kwargs):
@@ -579,7 +590,8 @@ class OpenCTIApiClient:
                 else:
                     mime_type = magic.from_file(file_name, mime=True)
 
-            return self.query(query, {"file": (File(file_name, data, mime_type))})
+            return self.query(query,
+                              {"file": (File(file_name, data, mime_type))})
         else:
             self.log(
                 "error",

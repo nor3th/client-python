@@ -36,9 +36,10 @@ report = opencti_api_client.report.create(
 # Associate the TTPs to the incident
 
 # Spearphishing Attachment
-ttp1 = opencti_api_client.attack_pattern.read(
-    filters=[{"key": "x_mitre_id", "values": ["T1193"]}]
-)
+ttp1 = opencti_api_client.attack_pattern.read(filters=[{
+    "key": "x_mitre_id",
+    "values": ["T1193"]
+}])
 ttp1_relation = opencti_api_client.stix_core_relationship.create(
     fromId=incident["id"],
     toId=ttp1["id"],
@@ -50,9 +51,7 @@ ttp1_relation = opencti_api_client.stix_core_relationship.create(
 # Add kill chain phases to the relation
 for kill_chain_phase_id in ttp1["killChainPhasesIds"]:
     opencti_api_client.stix_core_relationship.add_kill_chain_phase(
-        id=ttp1_relation["id"], kill_chain_phase_id=kill_chain_phase_id
-    )
-
+        id=ttp1_relation["id"], kill_chain_phase_id=kill_chain_phase_id)
 
 # Create the observable and indicator and indicates to the relation
 # Create the observable
@@ -74,20 +73,19 @@ indicator_ttp1_relation = opencti_api_client.stix_core_relationship.create(
 )
 
 # Prepare elements for the report
-object_refs.extend(
-    [
-        ttp1["id"],
-        ttp1_relation["id"],
-        indicator_ttp1["id"],
-        indicator_ttp1_relation["id"],
-    ]
-)
+object_refs.extend([
+    ttp1["id"],
+    ttp1_relation["id"],
+    indicator_ttp1["id"],
+    indicator_ttp1_relation["id"],
+])
 observable_refs.append(observable_ttp1["id"])
 
 # Registry Run Keys / Startup Folder
-ttp2 = opencti_api_client.attack_pattern.read(
-    filters=[{"key": "x_mitre_id", "values": ["T1060"]}]
-)
+ttp2 = opencti_api_client.attack_pattern.read(filters=[{
+    "key": "x_mitre_id",
+    "values": ["T1060"]
+}])
 # Create the relation
 ttp2_relation = opencti_api_client.stix_core_relationship.create(
     fromId=incident["id"],
@@ -100,8 +98,7 @@ ttp2_relation = opencti_api_client.stix_core_relationship.create(
 # Add kill chain phases to the relation
 for kill_chain_phase_id in ttp2["killChainPhasesIds"]:
     opencti_api_client.stix_core_relationship.add_kill_chain_phase(
-        id=ttp2_relation["id"], kill_chain_phase_id=kill_chain_phase_id
-    )
+        id=ttp2_relation["id"], kill_chain_phase_id=kill_chain_phase_id)
 
 # Create the observable and indicator and indicates to the relation
 # Create the observable
@@ -122,20 +119,19 @@ indicator_ttp2_relation = opencti_api_client.stix_core_relationship.create(
     stop_time=date,
 )
 # Elements for the report
-object_refs.extend(
-    [
-        ttp2["id"],
-        ttp2_relation["id"],
-        indicator_ttp2["id"],
-        indicator_ttp2_relation["id"],
-    ]
-)
+object_refs.extend([
+    ttp2["id"],
+    ttp2_relation["id"],
+    indicator_ttp2["id"],
+    indicator_ttp2_relation["id"],
+])
 observable_refs.append(observable_ttp2["id"])
 
 # Data Encrypted
-ttp3 = opencti_api_client.attack_pattern.read(
-    filters=[{"key": "x_mitre_id", "values": ["T1022"]}]
-)
+ttp3 = opencti_api_client.attack_pattern.read(filters=[{
+    "key": "x_mitre_id",
+    "values": ["T1022"]
+}])
 ttp3_relation = opencti_api_client.stix_core_relationship.create(
     fromId=incident["id"],
     toId=ttp3["id"],
@@ -147,20 +143,17 @@ ttp3_relation = opencti_api_client.stix_core_relationship.create(
 # Add kill chain phases to the relation
 for kill_chain_phase_id in ttp3["killChainPhasesIds"]:
     opencti_api_client.stix_core_relationship.add_kill_chain_phase(
-        id=ttp3_relation["id"], kill_chain_phase_id=kill_chain_phase_id
-    )
+        id=ttp3_relation["id"], kill_chain_phase_id=kill_chain_phase_id)
 # Elements for the report
 object_refs.extend([ttp3["id"], ttp3_relation["id"]])
 
 # Add all element to the report
 for object_ref in object_refs:
     opencti_api_client.report.add_stix_object_or_stix_relationship(
-        id=report["id"], stixObjectOrStixRelationshipId=object_ref
-    )
+        id=report["id"], stixObjectOrStixRelationshipId=object_ref)
 for observable_ref in observable_refs:
     opencti_api_client.report.add_stix_object_or_stix_relationship(
-        id=report["id"], stixObjectOrStixRelationshipId=observable_ref
-    )
+        id=report["id"], stixObjectOrStixRelationshipId=observable_ref)
     opencti_api_client.stix_core_relationship.create(
         fromId=observable_ref,
         toId=incident["id"],

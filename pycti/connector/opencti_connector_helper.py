@@ -124,17 +124,16 @@ class ListenQueue(threading.Thread):
         """
 
         json_data = json.loads(body)
-        self.thread = threading.Thread(target=self._data_handler, args=[json_data])
+        self.thread = threading.Thread(target=self._data_handler,
+                                       args=[json_data])
         self.thread.start()
         while self.thread.is_alive():  # Loop while the thread is processing
             assert self.pika_connection is not None
             self.pika_connection.sleep(1.0)
         logging.info(
             "%s",
-            (
-                f"Message (delivery_tag={method.delivery_tag}) processed"
-                ", thread terminated"
-            ),
+            (f"Message (delivery_tag={method.delivery_tag}) processed"
+             ", thread terminated"),
         )
         channel.basic_ack(delivery_tag=method.delivery_tag)
 
@@ -149,12 +148,12 @@ class ListenQueue(threading.Thread):
         # Execute the callback
         try:
             self.helper.api.work.to_received(
-                work_id, "Connector ready to process the operation"
-            )
+                work_id, "Connector ready to process the operation")
             message = self.callback(json_data["event"])
             self.helper.api.work.to_processed(work_id, message)
         except Exception as e:  # pylint: disable=broad-except
-            logging.exception("Error in message processing, reporting error to API")
+            logging.exception(
+                "Error in message processing, reporting error to API")
             try:
                 self.helper.api.work.to_processed(work_id, str(e), True)
             except:  # pylint: disable=bare-except
@@ -164,22 +163,24 @@ class ListenQueue(threading.Thread):
         while not self.exit_event.is_set():
             try:
                 # Connect the broker
-                self.pika_credentials = pika.PlainCredentials(self.user, self.password)
+                self.pika_credentials = pika.PlainCredentials(
+                    self.user, self.password)
                 self.pika_parameters = pika.ConnectionParameters(
                     host=self.host,
                     port=self.port,
                     virtual_host="/",
                     credentials=self.pika_credentials,
-                    ssl_options=pika.SSLOptions(create_ssl_context(), self.host)
-                    if self.use_ssl
-                    else None,
+                    ssl_options=pika.SSLOptions(create_ssl_context(),
+                                                self.host)
+                    if self.use_ssl else None,
                 )
-                self.pika_connection = pika.BlockingConnection(self.pika_parameters)
+                self.pika_connection = pika.BlockingConnection(
+                    self.pika_parameters)
                 self.channel = self.pika_connection.channel()
                 assert self.channel is not None
                 self.channel.basic_consume(
-                    queue=self.queue_name, on_message_callback=self._process_message
-                )
+                    queue=self.queue_name,
+                    on_message_callback=self._process_message)
                 self.channel.start_consuming()
             except (KeyboardInterrupt, SystemExit):
                 self.helper.log_info("Connector stop")
@@ -208,21 +209,18 @@ class PingAlive(threading.Thread):
         while not self.exit_event.is_set():
             try:
                 initial_state = self.get_state()
-                result = self.api.connector.ping(self.connector_id, initial_state)
-                remote_state = (
-                    json.loads(result["connector_state"])
-                    if result["connector_state"] is not None
-                    and len(result["connector_state"]) > 0
-                    else None
-                )
+                result = self.api.connector.ping(self.connector_id,
+                                                 initial_state)
+                remote_state = (json.loads(result["connector_state"])
+                                if result["connector_state"] is not None
+                                and len(result["connector_state"]) > 0 else
+                                None)
                 if initial_state != remote_state:
                     self.set_state(result["connector_state"])
                     logging.info(
                         "%s",
-                        (
-                            "Connector state has been remotely reset to: "
-                            f'"{self.get_state()}"'
-                        ),
+                        ("Connector state has been remotely reset to: "
+                         f'"{self.get_state()}"'),
                     )
                 if self.in_error:
                     self.in_error = False
@@ -242,9 +240,8 @@ class PingAlive(threading.Thread):
 
 
 class ListenStream(threading.Thread):
-    def __init__(
-        self, helper, callback, url, token, verify_ssl, start_timestamp, live_stream_id
-    ) -> None:
+    def __init__(self, helper, callback, url, token, verify_ssl,
+                 start_timestamp, live_stream_id) -> None:
         threading.Thread.__init__(self)
         self.helper = helper
         self.callback = callback
@@ -259,9 +256,9 @@ class ListenStream(threading.Thread):
         current_state = self.helper.get_state()
         if current_state is None:
             current_state = {
-                "connectorLastEventId": f"{self.start_timestamp}-0"
-                if self.start_timestamp is not None and len(self.start_timestamp) > 0
-                else "-"
+                "connectorLastEventId":
+                f"{self.start_timestamp}-0" if self.start_timestamp is not None
+                and len(self.start_timestamp) > 0 else "-"
             }
             self.helper.set_state(current_state)
 
@@ -275,32 +272,23 @@ class ListenStream(threading.Thread):
             else:
                 live_stream_uri = ""
             # Live stream "from" should be empty if start from the beginning
-            if (
-                self.live_stream_id is not None
-                or self.helper.connect_live_stream_id is not None
-            ):
+            if (self.live_stream_id is not None
+                    or self.helper.connect_live_stream_id is not None):
                 live_stream_from = (
                     f"?from={current_state['connectorLastEventId']}"
-                    if current_state["connectorLastEventId"] != "-"
-                    else ""
-                )
+                    if current_state["connectorLastEventId"] != "-" else "")
             # Global stream "from" should be 0 if starting from the beginning
             else:
                 live_stream_from = "?from=" + (
                     current_state["connectorLastEventId"]
-                    if current_state["connectorLastEventId"] != "-"
-                    else "0"
-                )
+                    if current_state["connectorLastEventId"] != "-" else "0")
             live_stream_url = f"{self.url}/stream{live_stream_uri}{live_stream_from}"
-            opencti_ssl_verify = (
-                self.verify_ssl if self.verify_ssl is not None else True
-            )
+            opencti_ssl_verify = (self.verify_ssl
+                                  if self.verify_ssl is not None else True)
             logging.info(
                 "%s",
-                (
-                    "Starting listening stream events (URL: "
-                    f"{live_stream_url}, SSL verify: {opencti_ssl_verify})"
-                ),
+                ("Starting listening stream events (URL: "
+                 f"{live_stream_url}, SSL verify: {opencti_ssl_verify})"),
             )
             messages = SSEClient(
                 live_stream_url,
@@ -308,37 +296,31 @@ class ListenStream(threading.Thread):
                 verify=opencti_ssl_verify,
             )
         else:
-            live_stream_uri = (
-                f"/{self.helper.connect_live_stream_id}"
-                if self.helper.connect_live_stream_id is not None
-                else ""
-            )
+            live_stream_uri = (f"/{self.helper.connect_live_stream_id}"
+                               if self.helper.connect_live_stream_id
+                               is not None else "")
             if self.helper.connect_live_stream_id is not None:
                 live_stream_from = (
                     f"?from={current_state['connectorLastEventId']}"
-                    if current_state["connectorLastEventId"] != "-"
-                    else ""
-                )
+                    if current_state["connectorLastEventId"] != "-" else "")
             # Global stream "from" should be 0 if starting from the beginning
             else:
                 live_stream_from = "?from=" + (
                     current_state["connectorLastEventId"]
-                    if current_state["connectorLastEventId"] != "-"
-                    else "0"
-                )
+                    if current_state["connectorLastEventId"] != "-" else "0")
             live_stream_url = (
                 f"{self.helper.opencti_url}/stream{live_stream_uri}{live_stream_from}"
             )
             logging.info(
                 "%s",
-                (
-                    f"Starting listening stream events (URL: {live_stream_url}"
-                    f", SSL verify: {self.helper.opencti_ssl_verify})"
-                ),
+                (f"Starting listening stream events (URL: {live_stream_url}"
+                 f", SSL verify: {self.helper.opencti_ssl_verify})"),
             )
             messages = SSEClient(
                 live_stream_url,
-                headers={"authorization": "Bearer " + self.helper.opencti_token},
+                headers={
+                    "authorization": "Bearer " + self.helper.opencti_token
+                },
                 verify=self.helper.opencti_ssl_verify,
             )
         # Iter on stream messages
@@ -372,25 +354,20 @@ class OpenCTIConnectorHelper:  # pylint: disable=too-many-public-methods
 
     def __init__(self, config: Dict) -> None:
         # Load API config
-        self.opencti_url = get_config_variable(
-            "OPENCTI_URL", ["opencti", "url"], config
-        )
-        self.opencti_token = get_config_variable(
-            "OPENCTI_TOKEN", ["opencti", "token"], config
-        )
+        self.opencti_url = get_config_variable("OPENCTI_URL",
+                                               ["opencti", "url"], config)
+        self.opencti_token = get_config_variable("OPENCTI_TOKEN",
+                                                 ["opencti", "token"], config)
         self.opencti_ssl_verify = get_config_variable(
-            "OPENCTI_SSL_VERIFY", ["opencti", "ssl_verify"], config, False, True
-        )
+            "OPENCTI_SSL_VERIFY", ["opencti", "ssl_verify"], config, False,
+            True)
         self.opencti_json_logging = get_config_variable(
-            "OPENCTI_JSON_LOGGING", ["opencti", "json_logging"], config
-        )
+            "OPENCTI_JSON_LOGGING", ["opencti", "json_logging"], config)
         # Load connector config
-        self.connect_id = get_config_variable(
-            "CONNECTOR_ID", ["connector", "id"], config
-        )
-        self.connect_type = get_config_variable(
-            "CONNECTOR_TYPE", ["connector", "type"], config
-        )
+        self.connect_id = get_config_variable("CONNECTOR_ID",
+                                              ["connector", "id"], config)
+        self.connect_type = get_config_variable("CONNECTOR_TYPE",
+                                                ["connector", "type"], config)
         self.connect_live_stream_id = get_config_variable(
             "CONNECTOR_LIVE_STREAM_ID",
             ["connector", "live_stream_id"],
@@ -398,21 +375,20 @@ class OpenCTIConnectorHelper:  # pylint: disable=too-many-public-methods
             False,
             None,
         )
-        self.connect_name = get_config_variable(
-            "CONNECTOR_NAME", ["connector", "name"], config
-        )
+        self.connect_name = get_config_variable("CONNECTOR_NAME",
+                                                ["connector", "name"], config)
         self.connect_confidence_level = get_config_variable(
             "CONNECTOR_CONFIDENCE_LEVEL",
             ["connector", "confidence_level"],
             config,
             True,
         )
-        self.connect_scope = get_config_variable(
-            "CONNECTOR_SCOPE", ["connector", "scope"], config
-        )
-        self.connect_auto = get_config_variable(
-            "CONNECTOR_AUTO", ["connector", "auto"], config, False, False
-        )
+        self.connect_scope = get_config_variable("CONNECTOR_SCOPE",
+                                                 ["connector", "scope"],
+                                                 config)
+        self.connect_auto = get_config_variable("CONNECTOR_AUTO",
+                                                ["connector", "auto"], config,
+                                                False, False)
         self.connect_only_contextual = get_config_variable(
             "CONNECTOR_ONLY_CONTEXTUAL",
             ["connector", "only_contextual"],
@@ -420,9 +396,9 @@ class OpenCTIConnectorHelper:  # pylint: disable=too-many-public-methods
             False,
             False,
         )
-        self.log_level = get_config_variable(
-            "CONNECTOR_LOG_LEVEL", ["connector", "log_level"], config
-        )
+        self.log_level = get_config_variable("CONNECTOR_LOG_LEVEL",
+                                             ["connector", "log_level"],
+                                             config)
         self.connect_run_and_terminate = get_config_variable(
             "CONNECTOR_RUN_AND_TERMINATE",
             ["connector", "run_and_terminate"],
@@ -433,8 +409,8 @@ class OpenCTIConnectorHelper:  # pylint: disable=too-many-public-methods
 
         # Configure logger
         numeric_level = getattr(
-            logging, self.log_level.upper() if self.log_level else "INFO", None
-        )
+            logging,
+            self.log_level.upper() if self.log_level else "INFO", None)
         if not isinstance(numeric_level, int):
             raise ValueError(f"Invalid log level: {self.log_level}")
         logging.basicConfig(level=numeric_level)
@@ -465,9 +441,8 @@ class OpenCTIConnectorHelper:  # pylint: disable=too-many-public-methods
 
         # Start ping thread
         if not self.connect_run_and_terminate:
-            self.ping = PingAlive(
-                self.connector.id, self.api, self.get_state, self.set_state
-            )
+            self.ping = PingAlive(self.connector.id, self.api, self.get_state,
+                                  self.set_state)
             self.ping.start()
 
         # self.listen_stream = None
@@ -574,11 +549,8 @@ class OpenCTIConnectorHelper:  # pylint: disable=too-many-public-methods
         :return: current datetime for utc
         :rtype: str
         """
-        return (
-            datetime.datetime.utcnow()
-            .replace(microsecond=0, tzinfo=datetime.timezone.utc)
-            .isoformat()
-        )
+        return (datetime.datetime.utcnow().replace(
+            microsecond=0, tzinfo=datetime.timezone.utc).isoformat())
 
     # Push Stix2 helper
     def send_stix2_bundle(self, bundle, **kwargs) -> list:
@@ -609,18 +581,16 @@ class OpenCTIConnectorHelper:  # pylint: disable=too-many-public-methods
         if work_id is not None:
             self.api.work.add_expectations(work_id, len(bundles))
         pika_credentials = pika.PlainCredentials(
-            self.config["connection"]["user"], self.config["connection"]["pass"]
-        )
+            self.config["connection"]["user"],
+            self.config["connection"]["pass"])
         pika_parameters = pika.ConnectionParameters(
             host=self.config["connection"]["host"],
             port=self.config["connection"]["port"],
             virtual_host="/",
             credentials=pika_credentials,
-            ssl_options=pika.SSLOptions(
-                create_ssl_context(), self.config["connection"]["host"]
-            )
-            if self.config["connection"]["use_ssl"]
-            else None,
+            ssl_options=pika.SSLOptions(create_ssl_context(),
+                                        self.config["connection"]["host"])
+            if self.config["connection"]["use_ssl"] else None,
         )
 
         pika_connection = pika.BlockingConnection(pika_parameters)
@@ -669,7 +639,8 @@ class OpenCTIConnectorHelper:  # pylint: disable=too-many-public-methods
             "applicant_id": self.applicant_id,
             "action_sequence": sequence,
             "entities_types": entities_types,
-            "content": base64.b64encode(bundle.encode("utf-8")).decode("utf-8"),
+            "content":
+            base64.b64encode(bundle.encode("utf-8")).decode("utf-8"),
             "update": update,
         }
         if work_id is not None:
@@ -721,28 +692,27 @@ class OpenCTIConnectorHelper:  # pylint: disable=too-many-public-methods
         for item in bundle_data["objects"]:
             if item["type"] == "report":
                 items_to_send = self.stix2_deduplicate_objects(
-                    self.stix2_get_report_objects(item)
-                )
+                    self.stix2_get_report_objects(item))
                 for item_to_send in items_to_send:
                     self.cache_added.append(item_to_send["id"])
                 bundles.append(self.stix2_create_bundle(items_to_send))
 
         # Relationships not added in previous reports
         for item in bundle_data["objects"]:
-            if item["type"] == "relationship" and item["id"] not in self.cache_added:
+            if item["type"] == "relationship" and item[
+                    "id"] not in self.cache_added:
                 items_to_send = self.stix2_deduplicate_objects(
-                    self.stix2_get_relationship_objects(item)
-                )
+                    self.stix2_get_relationship_objects(item))
                 for item_to_send in items_to_send:
                     self.cache_added.append(item_to_send["id"])
                 bundles.append(self.stix2_create_bundle(items_to_send))
 
         # Entities not added in previous reports and relationships
         for item in bundle_data["objects"]:
-            if item["type"] != "relationship" and item["id"] not in self.cache_added:
+            if item["type"] != "relationship" and item[
+                    "id"] not in self.cache_added:
                 items_to_send = self.stix2_deduplicate_objects(
-                    self.stix2_get_entity_objects(item)
-                )
+                    self.stix2_get_entity_objects(item))
                 for item_to_send in items_to_send:
                     self.cache_added.append(item_to_send["id"])
                 bundles.append(self.stix2_create_bundle(items_to_send))
@@ -762,10 +732,12 @@ class OpenCTIConnectorHelper:  # pylint: disable=too-many-public-methods
         if "object_marking_refs" in item:
             for object_marking_ref in item["object_marking_refs"]:
                 if object_marking_ref in self.cache_index:
-                    object_marking_refs.append(self.cache_index[object_marking_ref])
+                    object_marking_refs.append(
+                        self.cache_index[object_marking_ref])
         # Created by ref
         created_by_ref = None
-        if "created_by_ref" in item and item["created_by_ref"] in self.cache_index:
+        if "created_by_ref" in item and item[
+                "created_by_ref"] in self.cache_index:
             created_by_ref = self.cache_index[item["created_by_ref"]]
 
         return {

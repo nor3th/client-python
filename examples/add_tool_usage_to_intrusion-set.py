@@ -9,9 +9,8 @@ api_token = "YOUR_TOKEN"
 # OpenCTI initialization
 opencti_api_client = OpenCTIApiClient(api_url, api_token)
 
-tool = opencti_api_client.tool.create(
-    name="powashell.exe", description="A new evil tool."
-)
+tool = opencti_api_client.tool.create(name="powashell.exe",
+                                      description="A new evil tool.")
 
 print(tool)
 

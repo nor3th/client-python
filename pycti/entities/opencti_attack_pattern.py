@@ -163,17 +163,15 @@ class AttackPattern:
             first = 500
 
         self.opencti.log(
-            "info", "Listing Attack-Patterns with filters " + json.dumps(filters) + "."
-        )
-        query = (
-            """
+            "info", "Listing Attack-Patterns with filters " +
+            json.dumps(filters) + ".")
+        query = ("""
             query AttackPatterns($filters: [AttackPatternsFiltering], $search: String, $first: Int, $after: ID, $orderBy: AttackPatternsOrdering, $orderMode: OrderingMode) {
                 attackPatterns(filters: $filters, search: $search, first: $first, after: $after, orderBy: $orderBy, orderMode: $orderMode) {
                     edges {
                         node {
-                            """
-            + (custom_attributes if custom_attributes is not None else self.properties)
-            + """
+                            """ + (custom_attributes if custom_attributes
+                                   is not None else self.properties) + """
                         }
                     }
                     pageInfo {
@@ -185,8 +183,7 @@ class AttackPattern:
                     }
                 }
             }
-        """
-        )
+        """)
         result = self.opencti.query(
             query,
             {
@@ -200,11 +197,14 @@ class AttackPattern:
         )
         if get_all:
             final_data = []
-            data = self.opencti.process_multiple(result["data"]["attackPatterns"])
+            data = self.opencti.process_multiple(
+                result["data"]["attackPatterns"])
             final_data = final_data + data
             while result["data"]["attackPatterns"]["pageInfo"]["hasNextPage"]:
-                after = result["data"]["attackPatterns"]["pageInfo"]["endCursor"]
-                self.opencti.log("info", "Listing Attack-Patterns after " + after)
+                after = result["data"]["attackPatterns"]["pageInfo"][
+                    "endCursor"]
+                self.opencti.log("info",
+                                 "Listing Attack-Patterns after " + after)
                 result = self.opencti.query(
                     query,
                     {
@@ -216,13 +216,13 @@ class AttackPattern:
                         "orderMode": order_mode,
                     },
                 )
-                data = self.opencti.process_multiple(result["data"]["attackPatterns"])
+                data = self.opencti.process_multiple(
+                    result["data"]["attackPatterns"])
                 final_data = final_data + data
             return final_data
         else:
             return self.opencti.process_multiple(
-                result["data"]["attackPatterns"], with_pagination
-            )
+                result["data"]["attackPatterns"], with_pagination)
 
     """
         Read a Attack-Pattern object
@@ -238,23 +238,17 @@ class AttackPattern:
         custom_attributes = kwargs.get("customAttributes", None)
         if id is not None:
             self.opencti.log("info", "Reading Attack-Pattern {" + id + "}.")
-            query = (
-                """
+            query = ("""
                 query AttackPattern($id: String!) {
                     attackPattern(id: $id) {
-                        """
-                + (
-                    custom_attributes
-                    if custom_attributes is not None
-                    else self.properties
-                )
-                + """
+                        """ + (custom_attributes if custom_attributes
+                               is not None else self.properties) + """
                     }
                 }
-             """
-            )
+             """)
             result = self.opencti.query(query, {"id": id})
-            return self.opencti.process_multiple_fields(result["data"]["attackPattern"])
+            return self.opencti.process_multiple_fields(
+                result["data"]["attackPattern"])
         elif filters is not None:
             result = self.list(filters=filters)
             if len(result) > 0:
@@ -263,8 +257,8 @@ class AttackPattern:
                 return None
         else:
             self.opencti.log(
-                "error", "[opencti_attack_pattern] Missing parameters: id or filters"
-            )
+                "error",
+                "[opencti_attack_pattern] Missing parameters: id or filters")
             return None
 
     """
@@ -289,7 +283,8 @@ class AttackPattern:
         description = kwargs.get("description", "")
         aliases = kwargs.get("aliases", None)
         x_mitre_platforms = kwargs.get("x_mitre_platforms", None)
-        x_mitre_permissions_required = kwargs.get("x_mitre_permissions_required", None)
+        x_mitre_permissions_required = kwargs.get(
+            "x_mitre_permissions_required", None)
         x_mitre_detection = kwargs.get("x_mitre_detection", None)
         x_mitre_id = kwargs.get("x_mitre_id", None)
         kill_chain_phases = kwargs.get("killChainPhases", None)
@@ -326,7 +321,8 @@ class AttackPattern:
                         "description": description,
                         "aliases": aliases,
                         "x_mitre_platforms": x_mitre_platforms,
-                        "x_mitre_permissions_required": x_mitre_permissions_required,
+                        "x_mitre_permissions_required":
+                        x_mitre_permissions_required,
                         "x_mitre_detection": x_mitre_detection,
                         "x_mitre_id": x_mitre_id,
                         "killChainPhases": kill_chain_phases,
@@ -336,8 +332,7 @@ class AttackPattern:
                 },
             )
             return self.opencti.process_multiple_fields(
-                result["data"]["attackPatternAdd"]
-            )
+                result["data"]["attackPatternAdd"])
         else:
             self.opencti.log(
                 "error",
@@ -362,83 +357,70 @@ class AttackPattern:
                 x_mitre_id = stix_object["x_mitre_id"]
             elif "external_references" in stix_object:
                 for external_reference in stix_object["external_references"]:
-                    if (
-                        external_reference["source_name"] == "mitre-attack"
-                        or external_reference["source_name"] == "mitre-pre-attack"
-                        or external_reference["source_name"] == "mitre-mobile-attack"
-                        or external_reference["source_name"] == "amitt-attack"
-                    ):
-                        x_mitre_id = (
-                            external_reference["external_id"]
-                            if "external_id" in external_reference
-                            else None
-                        )
+                    if (external_reference["source_name"] == "mitre-attack"
+                            or external_reference["source_name"]
+                            == "mitre-pre-attack"
+                            or external_reference["source_name"]
+                            == "mitre-mobile-attack"
+                            or external_reference["source_name"]
+                            == "amitt-attack"):
+                        x_mitre_id = (external_reference["external_id"]
+                                      if "external_id" in external_reference
+                                      else None)
 
             # TODO: Compatibility with OpenCTI 3.X to be REMOVED
             if "x_opencti_order" not in stix_object:
                 stix_object["x_opencti_order"] = (
                     stix_object["x_opencti_level"]
-                    if "x_opencti_level" in stix_object
-                    else 0
-                )
+                    if "x_opencti_level" in stix_object else 0)
             if "x_mitre_id" not in stix_object:
                 stix_object["x_mitre_id"] = (
                     stix_object["x_opencti_external_id"]
-                    if "x_opencti_external_id" in stix_object
-                    else None
-                )
+                    if "x_opencti_external_id" in stix_object else None)
             return self.create(
                 stix_id=stix_object["id"],
                 createdBy=extras["created_by_id"]
-                if "created_by_id" in extras
-                else None,
+                if "created_by_id" in extras else None,
                 objectMarking=extras["object_marking_ids"]
-                if "object_marking_ids" in extras
-                else None,
+                if "object_marking_ids" in extras else None,
                 objectLabel=extras["object_label_ids"]
-                if "object_label_ids" in extras
-                else [],
+                if "object_label_ids" in extras else [],
                 externalReferences=extras["external_references_ids"]
-                if "external_references_ids" in extras
-                else [],
-                revoked=stix_object["revoked"] if "revoked" in stix_object else None,
+                if "external_references_ids" in extras else [],
+                revoked=stix_object["revoked"]
+                if "revoked" in stix_object else None,
                 confidence=stix_object["confidence"]
-                if "confidence" in stix_object
-                else None,
+                if "confidence" in stix_object else None,
                 lang=stix_object["lang"] if "lang" in stix_object else None,
-                created=stix_object["created"] if "created" in stix_object else None,
-                modified=stix_object["modified"] if "modified" in stix_object else None,
+                created=stix_object["created"]
+                if "created" in stix_object else None,
+                modified=stix_object["modified"]
+                if "modified" in stix_object else None,
                 name=stix_object["name"],
                 description=self.opencti.stix2.convert_markdown(
-                    stix_object["description"]
-                )
-                if "description" in stix_object
-                else "",
+                    stix_object["description"])
+                if "description" in stix_object else "",
                 aliases=self.opencti.stix2.pick_aliases(stix_object),
                 x_mitre_platforms=stix_object["x_mitre_platforms"]
-                if "x_mitre_platforms" in stix_object
-                else stix_object["x_amitt_platforms"]
-                if "x_amitt_platforms" in stix_object
-                else None,
-                x_mitre_permissions_required=stix_object["x_mitre_permissions_required"]
-                if "x_mitre_permissions_required" in stix_object
-                else None,
+                if "x_mitre_platforms" in stix_object else
+                stix_object["x_amitt_platforms"]
+                if "x_amitt_platforms" in stix_object else None,
+                x_mitre_permissions_required=stix_object[
+                    "x_mitre_permissions_required"]
+                if "x_mitre_permissions_required" in stix_object else None,
                 x_mitre_detection=stix_object["x_mitre_detection"]
-                if "x_mitre_detection" in stix_object
-                else None,
+                if "x_mitre_detection" in stix_object else None,
                 x_mitre_id=x_mitre_id,
                 killChainPhases=extras["kill_chain_phases_ids"]
-                if "kill_chain_phases_ids" in extras
-                else None,
+                if "kill_chain_phases_ids" in extras else None,
                 x_opencti_stix_ids=stix_object["x_opencti_stix_ids"]
-                if "x_opencti_stix_ids" in stix_object
-                else None,
+                if "x_opencti_stix_ids" in stix_object else None,
                 update=update,
             )
         else:
             self.opencti.log(
-                "error", "[opencti_attack_pattern] Missing parameters: stixObject"
-            )
+                "error",
+                "[opencti_attack_pattern] Missing parameters: stixObject")
 
     def delete(self, **kwargs):
         id = kwargs.get("id", None)
@@ -453,5 +435,6 @@ class AttackPattern:
              """
             self.opencti.query(query, {"id": id})
         else:
-            self.opencti.log("error", "[attack_pattern] Missing parameters: id")
+            self.opencti.log("error",
+                             "[attack_pattern] Missing parameters: id")
             return None

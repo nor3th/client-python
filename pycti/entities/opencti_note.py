@@ -231,17 +231,14 @@ class Note:
             first = 100
 
         self.opencti.log(
-            "info", "Listing Notes with filters " + json.dumps(filters) + "."
-        )
-        query = (
-            """
+            "info", "Listing Notes with filters " + json.dumps(filters) + ".")
+        query = ("""
             query Notes($filters: [NotesFiltering], $search: String, $first: Int, $after: ID, $orderBy: NotesOrdering, $orderMode: OrderingMode) {
                 notes(filters: $filters, search: $search, first: $first, after: $after, orderBy: $orderBy, orderMode: $orderMode) {
                     edges {
                         node {
-                            """
-            + (custom_attributes if custom_attributes is not None else self.properties)
-            + """
+                            """ + (custom_attributes if custom_attributes
+                                   is not None else self.properties) + """
                         }
                     }
                     pageInfo {
@@ -253,8 +250,7 @@ class Note:
                     }                    
                 }
             }
-        """
-        )
+        """)
         result = self.opencti.query(
             query,
             {
@@ -288,9 +284,8 @@ class Note:
                 final_data = final_data + data
             return final_data
         else:
-            return self.opencti.process_multiple(
-                result["data"]["notes"], with_pagination
-            )
+            return self.opencti.process_multiple(result["data"]["notes"],
+                                                 with_pagination)
 
     """
         Read a Note object
@@ -306,21 +301,14 @@ class Note:
         custom_attributes = kwargs.get("customAttributes", None)
         if id is not None:
             self.opencti.log("info", "Reading Note {" + id + "}.")
-            query = (
-                """
+            query = ("""
                 query Note($id: String!) {
                     note(id: $id) {
-                        """
-                + (
-                    custom_attributes
-                    if custom_attributes is not None
-                    else self.properties
-                )
-                + """
+                        """ + (custom_attributes if custom_attributes
+                               is not None else self.properties) + """
                     }
                 }
-            """
-            )
+            """)
             result = self.opencti.query(query, {"id": id})
             return self.opencti.process_multiple_fields(result["data"]["note"])
         elif filters is not None:
@@ -339,16 +327,12 @@ class Note:
     def contains_stix_object_or_stix_relationship(self, **kwargs):
         id = kwargs.get("id", None)
         stix_object_or_stix_relationship_id = kwargs.get(
-            "stixObjectOrStixRelationshipId", None
-        )
+            "stixObjectOrStixRelationshipId", None)
         if id is not None and stix_object_or_stix_relationship_id is not None:
             self.opencti.log(
                 "info",
-                "Checking StixObjectOrStixRelationship {"
-                + stix_object_or_stix_relationship_id
-                + "} in Note {"
-                + id
-                + "}",
+                "Checking StixObjectOrStixRelationship {" +
+                stix_object_or_stix_relationship_id + "} in Note {" + id + "}",
             )
             query = """
                 query NoteContainsStixObjectOrStixRelationship($id: String!, $stixObjectOrStixRelationshipId: String!) {
@@ -358,8 +342,10 @@ class Note:
             result = self.opencti.query(
                 query,
                 {
-                    "id": id,
-                    "stixObjectOrStixRelationshipId": stix_object_or_stix_relationship_id,
+                    "id":
+                    id,
+                    "stixObjectOrStixRelationshipId":
+                    stix_object_or_stix_relationship_id,
                 },
             )
             return result["data"]["noteContainsStixObjectOrStixRelationship"]
@@ -427,7 +413,8 @@ class Note:
                     }
                 },
             )
-            return self.opencti.process_multiple_fields(result["data"]["noteAdd"])
+            return self.opencti.process_multiple_fields(
+                result["data"]["noteAdd"])
         else:
             self.opencti.log(
                 "error",
@@ -445,21 +432,17 @@ class Note:
     def add_stix_object_or_stix_relationship(self, **kwargs):
         id = kwargs.get("id", None)
         stix_object_or_stix_relationship_id = kwargs.get(
-            "stixObjectOrStixRelationshipId", None
-        )
+            "stixObjectOrStixRelationshipId", None)
         if id is not None and stix_object_or_stix_relationship_id is not None:
             if self.contains_stix_object_or_stix_relationship(
-                id=id,
-                stixObjectOrStixRelationshipId=stix_object_or_stix_relationship_id,
+                    id=id,
+                    stixObjectOrStixRelationshipId=stix_object_or_stix_relationship_id,
             ):
                 return True
             self.opencti.log(
                 "info",
-                "Adding StixObjectOrStixRelationship {"
-                + stix_object_or_stix_relationship_id
-                + "} to Note {"
-                + id
-                + "}",
+                "Adding StixObjectOrStixRelationship {" +
+                stix_object_or_stix_relationship_id + "} to Note {" + id + "}",
             )
             query = """
                mutation NoteEdit($id: ID!, $input: StixMetaRelationshipAddInput) {
@@ -499,16 +482,12 @@ class Note:
     def remove_stix_object_or_stix_relationship(self, **kwargs):
         id = kwargs.get("id", None)
         stix_object_or_stix_relationship_id = kwargs.get(
-            "stixObjectOrStixRelationshipId", None
-        )
+            "stixObjectOrStixRelationshipId", None)
         if id is not None and stix_object_or_stix_relationship_id is not None:
             self.opencti.log(
                 "info",
-                "Removing StixObjectOrStixRelationship {"
-                + stix_object_or_stix_relationship_id
-                + "} to Note {"
-                + id
-                + "}",
+                "Removing StixObjectOrStixRelationship {" +
+                stix_object_or_stix_relationship_id + "} to Note {" + id + "}",
             )
             query = """
                mutation NotetEditRelationDelete($id: ID!, $toId: String!, $relationship_type: String!) {
@@ -530,8 +509,7 @@ class Note:
             return True
         else:
             self.opencti.log(
-                "error", "[opencti_note] Missing parameters: id and entity_id"
-            )
+                "error", "[opencti_note] Missing parameters: id and entity_id")
             return False
 
     """
@@ -549,37 +527,35 @@ class Note:
             return self.create(
                 stix_id=stix_object["id"],
                 createdBy=extras["created_by_id"]
-                if "created_by_id" in extras
-                else None,
+                if "created_by_id" in extras else None,
                 objectMarking=extras["object_marking_ids"]
-                if "object_marking_ids" in extras
-                else None,
+                if "object_marking_ids" in extras else None,
                 objectLabel=extras["object_label_ids"]
-                if "object_label_ids" in extras
-                else [],
+                if "object_label_ids" in extras else [],
                 externalReferences=extras["external_references_ids"]
-                if "external_references_ids" in extras
-                else [],
-                revoked=stix_object["revoked"] if "revoked" in stix_object else None,
+                if "external_references_ids" in extras else [],
+                revoked=stix_object["revoked"]
+                if "revoked" in stix_object else None,
                 confidence=stix_object["confidence"]
-                if "confidence" in stix_object
-                else None,
+                if "confidence" in stix_object else None,
                 lang=stix_object["lang"] if "lang" in stix_object else None,
-                created=stix_object["created"] if "created" in stix_object else None,
-                modified=stix_object["modified"] if "modified" in stix_object else None,
-                abstract=self.opencti.stix2.convert_markdown(stix_object["abstract"])
-                if "abstract" in stix_object
-                else "",
-                content=self.opencti.stix2.convert_markdown(stix_object["content"])
-                if "content" in stix_object
-                else "",
+                created=stix_object["created"]
+                if "created" in stix_object else None,
+                modified=stix_object["modified"]
+                if "modified" in stix_object else None,
+                abstract=self.opencti.stix2.convert_markdown(
+                    stix_object["abstract"])
+                if "abstract" in stix_object else "",
+                content=self.opencti.stix2.convert_markdown(
+                    stix_object["content"])
+                if "content" in stix_object else "",
                 x_opencti_stix_ids=stix_object["x_opencti_stix_ids"]
-                if "x_opencti_stix_ids" in stix_object
-                else None,
-                authors=stix_object["authors"] if "authors" in stix_object else None,
+                if "x_opencti_stix_ids" in stix_object else None,
+                authors=stix_object["authors"]
+                if "authors" in stix_object else None,
                 update=update,
             )
         else:
             self.opencti.log(
-                "error", "[opencti_attack_pattern] Missing parameters: stixObject"
-            )
+                "error",
+                "[opencti_attack_pattern] Missing parameters: stixObject")

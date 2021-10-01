@@ -234,17 +234,15 @@ class Report:
             first = 100
 
         self.opencti.log(
-            "info", "Listing Reports with filters " + json.dumps(filters) + "."
-        )
-        query = (
-            """
+            "info",
+            "Listing Reports with filters " + json.dumps(filters) + ".")
+        query = ("""
             query Reports($filters: [ReportsFiltering], $search: String, $first: Int, $after: ID, $orderBy: ReportsOrdering, $orderMode: OrderingMode) {
                 reports(filters: $filters, search: $search, first: $first, after: $after, orderBy: $orderBy, orderMode: $orderMode) {
                     edges {
                         node {
-                            """
-            + (custom_attributes if custom_attributes is not None else self.properties)
-            + """
+                            """ + (custom_attributes if custom_attributes
+                                   is not None else self.properties) + """
                         }
                     }
                     pageInfo {
@@ -256,8 +254,7 @@ class Report:
                     }
                 }
             }
-        """
-        )
+        """)
         result = self.opencti.query(
             query,
             {
@@ -291,9 +288,8 @@ class Report:
                 final_data = final_data + data
             return final_data
         else:
-            return self.opencti.process_multiple(
-                result["data"]["reports"], with_pagination
-            )
+            return self.opencti.process_multiple(result["data"]["reports"],
+                                                 with_pagination)
 
     """
         Read a Report object
@@ -309,23 +305,17 @@ class Report:
         custom_attributes = kwargs.get("customAttributes", None)
         if id is not None:
             self.opencti.log("info", "Reading Report {" + id + "}.")
-            query = (
-                """
+            query = ("""
                 query Report($id: String!) {
                     report(id: $id) {
-                        """
-                + (
-                    custom_attributes
-                    if custom_attributes is not None
-                    else self.properties
-                )
-                + """
+                        """ + (custom_attributes if custom_attributes
+                               is not None else self.properties) + """
                     }
                 }
-            """
-            )
+            """)
             result = self.opencti.query(query, {"id": id})
-            return self.opencti.process_multiple_fields(result["data"]["report"])
+            return self.opencti.process_multiple_fields(
+                result["data"]["report"])
         elif filters is not None:
             result = self.list(filters=filters)
             if len(result) > 0:
@@ -349,13 +339,20 @@ class Report:
         custom_attributes = kwargs.get("customAttributes", None)
         object_result = None
         if stix_id is not None:
-            object_result = self.read(id=stix_id, customAttributes=custom_attributes)
+            object_result = self.read(id=stix_id,
+                                      customAttributes=custom_attributes)
         if object_result is None and name is not None and published is not None:
             published_final = parse(published).strftime("%Y-%m-%d")
             object_result = self.read(
                 filters=[
-                    {"key": "name", "values": [name]},
-                    {"key": "published_day", "values": [published_final]},
+                    {
+                        "key": "name",
+                        "values": [name]
+                    },
+                    {
+                        "key": "published_day",
+                        "values": [published_final]
+                    },
                 ],
                 customAttributes=custom_attributes,
             )
@@ -372,16 +369,13 @@ class Report:
     def contains_stix_object_or_stix_relationship(self, **kwargs):
         id = kwargs.get("id", None)
         stix_object_or_stix_relationship_id = kwargs.get(
-            "stixObjectOrStixRelationshipId", None
-        )
+            "stixObjectOrStixRelationshipId", None)
         if id is not None and stix_object_or_stix_relationship_id is not None:
             self.opencti.log(
                 "info",
-                "Checking StixObjectOrStixRelationship {"
-                + stix_object_or_stix_relationship_id
-                + "} in Report {"
-                + id
-                + "}",
+                "Checking StixObjectOrStixRelationship {" +
+                stix_object_or_stix_relationship_id + "} in Report {" + id +
+                "}",
             )
             query = """
                 query ReportContainsStixObjectOrStixRelationship($id: String!, $stixObjectOrStixRelationshipId: String!) {
@@ -391,8 +385,10 @@ class Report:
             result = self.opencti.query(
                 query,
                 {
-                    "id": id,
-                    "stixObjectOrStixRelationshipId": stix_object_or_stix_relationship_id,
+                    "id":
+                    id,
+                    "stixObjectOrStixRelationshipId":
+                    stix_object_or_stix_relationship_id,
                 },
             )
             return result["data"]["reportContainsStixObjectOrStixRelationship"]
@@ -462,7 +458,8 @@ class Report:
                     }
                 },
             )
-            return self.opencti.process_multiple_fields(result["data"]["reportAdd"])
+            return self.opencti.process_multiple_fields(
+                result["data"]["reportAdd"])
         else:
             self.opencti.log(
                 "error",
@@ -480,16 +477,13 @@ class Report:
     def add_stix_object_or_stix_relationship(self, **kwargs):
         id = kwargs.get("id", None)
         stix_object_or_stix_relationship_id = kwargs.get(
-            "stixObjectOrStixRelationshipId", None
-        )
+            "stixObjectOrStixRelationshipId", None)
         if id is not None and stix_object_or_stix_relationship_id is not None:
             self.opencti.log(
                 "info",
-                "Adding StixObjectOrStixRelationship {"
-                + stix_object_or_stix_relationship_id
-                + "} to Report {"
-                + id
-                + "}",
+                "Adding StixObjectOrStixRelationship {" +
+                stix_object_or_stix_relationship_id + "} to Report {" + id +
+                "}",
             )
             query = """
                mutation ReportEditRelationAdd($id: ID!, $input: StixMetaRelationshipAddInput) {
@@ -529,16 +523,13 @@ class Report:
     def remove_stix_object_or_stix_relationship(self, **kwargs):
         id = kwargs.get("id", None)
         stix_object_or_stix_relationship_id = kwargs.get(
-            "stixObjectOrStixRelationshipId", None
-        )
+            "stixObjectOrStixRelationshipId", None)
         if id is not None and stix_object_or_stix_relationship_id is not None:
             self.opencti.log(
                 "info",
-                "Removing StixObjectOrStixRelationship {"
-                + stix_object_or_stix_relationship_id
-                + "} to Report {"
-                + id
-                + "}",
+                "Removing StixObjectOrStixRelationship {" +
+                stix_object_or_stix_relationship_id + "} to Report {" + id +
+                "}",
             )
             query = """
                mutation ReportEditRelationDelete($id: ID!, $toId: String!, $relationship_type: String!) {
@@ -580,55 +571,45 @@ class Report:
 
             # TODO: Compatibility with OpenCTI 3.X to be REMOVED
             if "report_types" not in stix_object:
-                stix_object["report_types"] = (
-                    [stix_object["x_opencti_report_class"]]
-                    if "x_opencti_report_class" in stix_object
-                    else None
-                )
+                stix_object["report_types"] = ([
+                    stix_object["x_opencti_report_class"]
+                ] if "x_opencti_report_class" in stix_object else None)
             if "confidence" not in stix_object:
                 stix_object["confidence"] = (
-                    stix_object["x_opencti_source_confidence_level"]
-                    if "x_opencti_source_confidence_level" in stix_object
-                    else 0
-                )
+                    stix_object["x_opencti_source_confidence_level"] if
+                    "x_opencti_source_confidence_level" in stix_object else 0)
 
             return self.create(
                 stix_id=stix_object["id"],
                 createdBy=extras["created_by_id"]
-                if "created_by_id" in extras
-                else None,
+                if "created_by_id" in extras else None,
                 objectMarking=extras["object_marking_ids"]
-                if "object_marking_ids" in extras
-                else None,
+                if "object_marking_ids" in extras else None,
                 objectLabel=extras["object_label_ids"]
-                if "object_label_ids" in extras
-                else [],
+                if "object_label_ids" in extras else [],
                 externalReferences=extras["external_references_ids"]
-                if "external_references_ids" in extras
-                else [],
-                revoked=stix_object["revoked"] if "revoked" in stix_object else None,
+                if "external_references_ids" in extras else [],
+                revoked=stix_object["revoked"]
+                if "revoked" in stix_object else None,
                 confidence=stix_object["confidence"]
-                if "confidence" in stix_object
-                else None,
+                if "confidence" in stix_object else None,
                 lang=stix_object["lang"] if "lang" in stix_object else None,
-                created=stix_object["created"] if "created" in stix_object else None,
-                modified=stix_object["modified"] if "modified" in stix_object else None,
+                created=stix_object["created"]
+                if "created" in stix_object else None,
+                modified=stix_object["modified"]
+                if "modified" in stix_object else None,
                 name=stix_object["name"],
                 description=self.opencti.stix2.convert_markdown(
-                    stix_object["description"]
-                )
-                if "description" in stix_object
-                else "",
+                    stix_object["description"])
+                if "description" in stix_object else "",
                 report_types=stix_object["report_types"]
-                if "report_types" in stix_object
-                else None,
+                if "report_types" in stix_object else None,
                 published=stix_object["published"]
-                if "published" in stix_object
-                else None,
+                if "published" in stix_object else None,
                 x_opencti_stix_ids=stix_object["x_opencti_stix_ids"]
-                if "x_opencti_stix_ids" in stix_object
-                else None,
+                if "x_opencti_stix_ids" in stix_object else None,
                 update=update,
             )
         else:
-            self.opencti.log("error", "[opencti_report] Missing parameters: stixObject")
+            self.opencti.log(
+                "error", "[opencti_report] Missing parameters: stixObject")

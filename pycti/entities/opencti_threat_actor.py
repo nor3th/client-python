@@ -167,17 +167,14 @@ class ThreatActor:
             first = 500
 
         self.opencti.log(
-            "info", "Listing Threat-Actors with filters " + json.dumps(filters) + "."
-        )
-        query = (
-            """
+            "info",
+            "Listing Threat-Actors with filters " + json.dumps(filters) + ".")
+        query = ("""
             query ThreatActors($filters: [ThreatActorsFiltering], $search: String, $first: Int, $after: ID, $orderBy: ThreatActorsOrdering, $orderMode: OrderingMode) {
                 threatActors(filters: $filters, search: $search, first: $first, after: $after, orderBy: $orderBy, orderMode: $orderMode) {
                     edges {
                         node {
-                            """
-            + self.properties
-            + """
+                            """ + self.properties + """
                         }
                     }
                     pageInfo {
@@ -189,8 +186,7 @@ class ThreatActor:
                     }
                 }
             }
-        """
-        )
+        """)
         result = self.opencti.query(
             query,
             {
@@ -202,9 +198,8 @@ class ThreatActor:
                 "orderMode": order_mode,
             },
         )
-        return self.opencti.process_multiple(
-            result["data"]["threatActors"], with_pagination
-        )
+        return self.opencti.process_multiple(result["data"]["threatActors"],
+                                             with_pagination)
 
     def read(self, **kwargs) -> Union[dict, None]:
         """Read a Threat-Actor object
@@ -225,23 +220,17 @@ class ThreatActor:
         custom_attributes = kwargs.get("customAttributes", None)
         if id is not None:
             self.opencti.log("info", "Reading Threat-Actor {" + id + "}.")
-            query = (
-                """
+            query = ("""
                 query ThreatActor($id: String!) {
                     threatActor(id: $id) {
-                        """
-                + (
-                    custom_attributes
-                    if custom_attributes is not None
-                    else self.properties
-                )
-                + """
+                        """ + (custom_attributes if custom_attributes
+                               is not None else self.properties) + """
                     }
                 }
-             """
-            )
+             """)
             result = self.opencti.query(query, {"id": id})
-            return self.opencti.process_multiple_fields(result["data"]["threatActor"])
+            return self.opencti.process_multiple_fields(
+                result["data"]["threatActor"])
         elif filters is not None:
             result = self.list(filters=filters)
             if len(result) > 0:
@@ -250,8 +239,8 @@ class ThreatActor:
                 return None
         else:
             self.opencti.log(
-                "error", "[opencti_threat_actor] Missing parameters: id or filters"
-            )
+                "error",
+                "[opencti_threat_actor] Missing parameters: id or filters")
             return None
 
     def create(self, **kwargs):
@@ -360,8 +349,7 @@ class ThreatActor:
                 },
             )
             return self.opencti.process_multiple_fields(
-                result["data"]["threatActorAdd"]
-            )
+                result["data"]["threatActorAdd"])
         else:
             self.opencti.log(
                 "error",
@@ -383,62 +371,49 @@ class ThreatActor:
             return self.create(
                 stix_id=stix_object["id"],
                 createdBy=extras["created_by_id"]
-                if "created_by_id" in extras
-                else None,
+                if "created_by_id" in extras else None,
                 objectMarking=extras["object_marking_ids"]
-                if "object_marking_ids" in extras
-                else None,
+                if "object_marking_ids" in extras else None,
                 objectLabel=extras["object_label_ids"]
-                if "object_label_ids" in extras
-                else [],
+                if "object_label_ids" in extras else [],
                 externalReferences=extras["external_references_ids"]
-                if "external_references_ids" in extras
-                else [],
-                revoked=stix_object["revoked"] if "revoked" in stix_object else None,
+                if "external_references_ids" in extras else [],
+                revoked=stix_object["revoked"]
+                if "revoked" in stix_object else None,
                 confidence=stix_object["confidence"]
-                if "confidence" in stix_object
-                else None,
+                if "confidence" in stix_object else None,
                 lang=stix_object["lang"] if "lang" in stix_object else None,
-                created=stix_object["created"] if "created" in stix_object else None,
-                modified=stix_object["modified"] if "modified" in stix_object else None,
+                created=stix_object["created"]
+                if "created" in stix_object else None,
+                modified=stix_object["modified"]
+                if "modified" in stix_object else None,
                 name=stix_object["name"],
                 description=self.opencti.stix2.convert_markdown(
-                    stix_object["description"]
-                )
-                if "description" in stix_object
-                else "",
+                    stix_object["description"])
+                if "description" in stix_object else "",
                 aliases=self.opencti.stix2.pick_aliases(stix_object),
                 threat_actor_types=stix_object["threat_actor_types"]
-                if "threat_actor_types" in stix_object
-                else None,
+                if "threat_actor_types" in stix_object else None,
                 first_seen=stix_object["first_seen"]
-                if "first_seen" in stix_object
-                else None,
+                if "first_seen" in stix_object else None,
                 last_seen=stix_object["last_seen"]
-                if "last_seen" in stix_object
-                else None,
+                if "last_seen" in stix_object else None,
                 goals=stix_object["goals"] if "goals" in stix_object else None,
                 sophistication=stix_object["sophistication"]
-                if "sophistication" in stix_object
-                else None,
+                if "sophistication" in stix_object else None,
                 resource_level=stix_object["resource_level"]
-                if "resource_level" in stix_object
-                else None,
+                if "resource_level" in stix_object else None,
                 primary_motivation=stix_object["primary_motivation"]
-                if "primary_motivation" in stix_object
-                else None,
+                if "primary_motivation" in stix_object else None,
                 secondary_motivations=stix_object["secondary_motivations"]
-                if "secondary_motivations" in stix_object
-                else None,
+                if "secondary_motivations" in stix_object else None,
                 personal_motivations=stix_object["personal_motivations"]
-                if "personal_motivations" in stix_object
-                else None,
+                if "personal_motivations" in stix_object else None,
                 x_opencti_stix_ids=stix_object["x_opencti_stix_ids"]
-                if "x_opencti_stix_ids" in stix_object
-                else None,
+                if "x_opencti_stix_ids" in stix_object else None,
                 update=update,
             )
         else:
             self.opencti.log(
-                "error", "[opencti_attack_pattern] Missing parameters: stixObject"
-            )
+                "error",
+                "[opencti_attack_pattern] Missing parameters: stixObject")

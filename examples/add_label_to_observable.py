@@ -11,8 +11,10 @@ opencti_api_client = OpenCTIApiClient(api_url, api_token)
 
 # Create the observable
 url = opencti_api_client.stix_cyber_observable.create(
-    observableData={"type": "url", "value": "http://johndoe.com"}
-)
+    observableData={
+        "type": "url",
+        "value": "http://johndoe.com"
+    })
 # Create the tag (if not exists)
 label = opencti_api_client.label.create(
     value="Suspicious",
@@ -20,7 +22,8 @@ label = opencti_api_client.label.create(
 )
 
 # Add the tag
-opencti_api_client.stix_cyber_observable.add_label(id=url["id"], label_id=label["id"])
+opencti_api_client.stix_cyber_observable.add_label(id=url["id"],
+                                                   label_id=label["id"])
 
 # Read the observable
 obs = opencti_api_client.stix_cyber_observable.read(id=url["id"])

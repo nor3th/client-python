@@ -2,6 +2,7 @@
 
 import json
 import os
+
 import magic
 
 
@@ -59,17 +60,15 @@ class ExternalReference:
 
         self.opencti.log(
             "info",
-            "Listing External-Reference with filters " + json.dumps(filters) + ".",
+            "Listing External-Reference with filters " + json.dumps(filters) +
+            ".",
         )
-        query = (
-            """
+        query = ("""
             query ExternalReferences($filters: [ExternalReferencesFiltering], $first: Int, $after: ID, $orderBy: ExternalReferencesOrdering, $orderMode: OrderingMode) {
                 externalReferences(filters: $filters, first: $first, after: $after, orderBy: $orderBy, orderMode: $orderMode) {
                     edges {
                         node {
-                            """
-            + self.properties
-            + """
+                            """ + self.properties + """
                         }
                     }
                     pageInfo {
@@ -81,8 +80,7 @@ class ExternalReference:
                     }
                 }
             }
-        """
-        )
+        """)
         result = self.opencti.query(
             query,
             {
@@ -94,8 +92,7 @@ class ExternalReference:
             },
         )
         return self.opencti.process_multiple(
-            result["data"]["externalReferences"], with_pagination
-        )
+            result["data"]["externalReferences"], with_pagination)
 
     """
         Read a External-Reference object
@@ -109,22 +106,18 @@ class ExternalReference:
         id = kwargs.get("id", None)
         filters = kwargs.get("filters", None)
         if id is not None:
-            self.opencti.log("info", "Reading External-Reference {" + id + "}.")
-            query = (
-                """
+            self.opencti.log("info",
+                             "Reading External-Reference {" + id + "}.")
+            query = ("""
                 query ExternalReference($id: String!) {
                     externalReference(id: $id) {
-                        """
-                + self.properties
-                + """
+                        """ + self.properties + """
                     }
                 }
-            """
-            )
+            """)
             result = self.opencti.query(query, {"id": id})
             return self.opencti.process_multiple_fields(
-                result["data"]["externalReference"]
-            )
+                result["data"]["externalReference"])
         elif filters is not None:
             result = self.list(filters=filters)
             if len(result) > 0:
@@ -158,19 +151,14 @@ class ExternalReference:
 
         if source_name is not None and url is not None:
             self.opencti.log(
-                "info", "Creating External Reference {" + source_name + "}."
-            )
-            query = (
-                """
+                "info", "Creating External Reference {" + source_name + "}.")
+            query = ("""
                 mutation ExternalReferenceAdd($input: ExternalReferenceAddInput) {
                     externalReferenceAdd(input: $input) {
-                        """
-                + self.properties
-                + """
+                        """ + self.properties + """
                     }
                 }
-            """
-            )
+            """)
             result = self.opencti.query(
                 query,
                 {
@@ -188,8 +176,7 @@ class ExternalReference:
                 },
             )
             return self.opencti.process_multiple_fields(
-                result["data"]["externalReferenceAdd"]
-            )
+                result["data"]["externalReferenceAdd"])
         else:
             self.opencti.log(
                 "error",
@@ -223,8 +210,8 @@ class ExternalReference:
                 return current_files[final_file_name]
             else:
                 self.opencti.log(
-                    "info", "Uploading a file in Stix-Domain-Object {" + id + "}."
-                )
+                    "info",
+                    "Uploading a file in Stix-Domain-Object {" + id + "}.")
                 query = """
                     mutation ExternalReferenceEdit($id: ID!, $file: Upload!) {
                         externalReferenceEdit(id: $id) {
@@ -244,7 +231,10 @@ class ExternalReference:
 
                 return self.opencti.query(
                     query,
-                    {"id": id, "file": (self.file(final_file_name, data, mime_type))},
+                    {
+                        "id": id,
+                        "file": (self.file(final_file_name, data, mime_type))
+                    },
                 )
         else:
             self.opencti.log(
@@ -265,7 +255,8 @@ class ExternalReference:
         id = kwargs.get("id", None)
         input = kwargs.get("input", None)
         if id is not None and input is not None:
-            self.opencti.log("info", "Updating External-Reference {" + id + "}.")
+            self.opencti.log("info",
+                             "Updating External-Reference {" + id + "}.")
             query = """
                     mutation ExternalReferenceEdit($id: ID!, $input: [EditInput]!) {
                         externalReferenceEdit(id: $id) {
@@ -277,8 +268,7 @@ class ExternalReference:
                 """
             result = self.opencti.query(query, {"id": id, "input": input})
             return self.opencti.process_multiple_fields(
-                result["data"]["externalReferenceEdit"]["fieldPatch"]
-            )
+                result["data"]["externalReferenceEdit"]["fieldPatch"])
         else:
             self.opencti.log(
                 "error",
@@ -323,6 +313,5 @@ class ExternalReference:
         """
         result = self.opencti.query(query, {"id": id})
         entity = self.opencti.process_multiple_fields(
-            result["data"]["externalReference"]
-        )
+            result["data"]["externalReference"])
         return entity["importFiles"]

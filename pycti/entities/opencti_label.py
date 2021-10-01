@@ -36,17 +36,13 @@ class Label:
             first = 500
 
         self.opencti.log(
-            "info", "Listing Labels with filters " + json.dumps(filters) + "."
-        )
-        query = (
-            """
+            "info", "Listing Labels with filters " + json.dumps(filters) + ".")
+        query = ("""
             query Labels($filters: [LabelsFiltering], $first: Int, $after: ID, $orderBy: LabelsOrdering, $orderMode: OrderingMode) {
                 labels(filters: $filters, first: $first, after: $after, orderBy: $orderBy, orderMode: $orderMode) {
                     edges {
                         node {
-                            """
-            + self.properties
-            + """
+                            """ + self.properties + """
                         }
                     }
                     pageInfo {
@@ -58,8 +54,7 @@ class Label:
                     }                    
                 }
             }
-        """
-        )
+        """)
         result = self.opencti.query(
             query,
             {
@@ -70,7 +65,8 @@ class Label:
                 "orderMode": order_mode,
             },
         )
-        return self.opencti.process_multiple(result["data"]["labels"], with_pagination)
+        return self.opencti.process_multiple(result["data"]["labels"],
+                                             with_pagination)
 
     """
         Read a Label object
@@ -85,19 +81,16 @@ class Label:
         filters = kwargs.get("filters", None)
         if id is not None:
             self.opencti.log("info", "Reading label {" + id + "}.")
-            query = (
-                """
+            query = ("""
                 query Label($id: String!) {
                     label(id: $id) {
-                        """
-                + self.properties
-                + """
+                        """ + self.properties + """
                     }
                 }
-            """
-            )
+            """)
             result = self.opencti.query(query, {"id": id})
-            return self.opencti.process_multiple_fields(result["data"]["label"])
+            return self.opencti.process_multiple_fields(
+                result["data"]["label"])
         elif filters is not None:
             result = self.list(filters=filters)
             if len(result) > 0:
@@ -106,8 +99,7 @@ class Label:
                 return None
         else:
             self.opencti.log(
-                "error", "[opencti_label] Missing parameters: id or filters"
-            )
+                "error", "[opencti_label] Missing parameters: id or filters")
             return None
 
     """
@@ -125,17 +117,13 @@ class Label:
         x_opencti_stix_ids = kwargs.get("x_opencti_stix_ids", None)
 
         if value is not None:
-            query = (
-                """
+            query = ("""
                 mutation LabelAdd($input: LabelAddInput) {
                     labelAdd(input: $input) {
-                        """
-                + self.properties
-                + """
+                        """ + self.properties + """
                     }
                 }
-            """
-            )
+            """)
             result = self.opencti.query(
                 query,
                 {
@@ -147,7 +135,8 @@ class Label:
                     }
                 },
             )
-            return self.opencti.process_multiple_fields(result["data"]["labelAdd"])
+            return self.opencti.process_multiple_fields(
+                result["data"]["labelAdd"])
         else:
             self.opencti.log(
                 "error",
@@ -186,8 +175,7 @@ class Label:
                 },
             )
             return self.opencti.process_multiple_fields(
-                result["data"]["labelEdit"]["fieldPatch"]
-            )
+                result["data"]["labelEdit"]["fieldPatch"])
         else:
             self.opencti.log(
                 "error",

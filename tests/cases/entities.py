@@ -1,8 +1,10 @@
-from typing import List, Dict, Union
+from typing import Dict, List, Union
+
 from stix2 import TLP_GREEN, TLP_WHITE, AttackPattern
+
 from pycti import OpenCTIStix2Utils
-from pycti.utils.constants import LocationTypes, IdentityTypes, ContainerTypes
-from tests.utils import get_incident_start_date, get_incident_end_date
+from pycti.utils.constants import ContainerTypes, IdentityTypes, LocationTypes
+from tests.utils import get_incident_end_date, get_incident_start_date
 
 
 class EntityTestCases:
@@ -201,37 +203,49 @@ class IdentitySectorTest(IdentityTest):
 class IndicatorTest(EntityTest):
     def setup(self):
         self.marking_definition_green = self.api_client.marking_definition.read(
-            id=TLP_GREEN["id"]
-        )
+            id=TLP_GREEN["id"])
         self.marking_definition_white = self.api_client.marking_definition.read(
-            id=TLP_WHITE["id"]
-        )
+            id=TLP_WHITE["id"])
         # Create the organization
         self.organization = self.api_client.identity.create(
-            **IdentityOrganizationTest(self.api_client).data()
-        )
+            **IdentityOrganizationTest(self.api_client).data())
 
     def data(self) -> Dict:
         return {
-            "type": "indicator",
-            "name": "C2 server of the new campaign",
-            "description": "This is the C2 server of the campaign",
-            "pattern_type": "stix",
-            "pattern": "[domain-name:value = 'www.5z8.info' AND domain-name:resolves_to_refs[*].value = '198.51.100.1/32']",
-            "x_opencti_main_observable_type": "IPv4-Addr",
-            "confidence": 60,
-            "x_opencti_score": 80,
-            "x_opencti_detection": True,
-            "valid_from": get_incident_start_date(),
-            "valid_until": get_incident_end_date(),
-            "created": get_incident_start_date(),
-            "modified": get_incident_start_date(),
-            "createdBy": self.organization["id"],
+            "type":
+            "indicator",
+            "name":
+            "C2 server of the new campaign",
+            "description":
+            "This is the C2 server of the campaign",
+            "pattern_type":
+            "stix",
+            "pattern":
+            "[domain-name:value = 'www.5z8.info' AND domain-name:resolves_to_refs[*].value = '198.51.100.1/32']",
+            "x_opencti_main_observable_type":
+            "IPv4-Addr",
+            "confidence":
+            60,
+            "x_opencti_score":
+            80,
+            "x_opencti_detection":
+            True,
+            "valid_from":
+            get_incident_start_date(),
+            "valid_until":
+            get_incident_end_date(),
+            "created":
+            get_incident_start_date(),
+            "modified":
+            get_incident_start_date(),
+            "createdBy":
+            self.organization["id"],
             "objectMarking": [
                 self.marking_definition_green["id"],
                 self.marking_definition_white["id"],
             ],
-            "update": True,
+            "update":
+            True,
             # TODO killchain phase
         }
 
@@ -273,11 +287,16 @@ class CourseOfActionTest(EntityTest):
 class ExternalReferenceTest(EntityTest):
     def data(self) -> Dict:
         return {
-            "type": "ExternalReference",
-            "source_name": "veris",
-            "description": "Evil veris link",
-            "external_id": "001AA7F-C601-424A-B2B8-BE6C9F5164E7",
-            "url": "https://github.com/vz-risk/VCDB/blob/125307638178efddd3ecfe2c267ea434667a4eea/data/json/validated/0001AA7F-C601-424A-B2B8-BE6C9F5164E7.json",
+            "type":
+            "ExternalReference",
+            "source_name":
+            "veris",
+            "description":
+            "Evil veris link",
+            "external_id":
+            "001AA7F-C601-424A-B2B8-BE6C9F5164E7",
+            "url":
+            "https://github.com/vz-risk/VCDB/blob/125307638178efddd3ecfe2c267ea434667a4eea/data/json/validated/0001AA7F-C601-424A-B2B8-BE6C9F5164E7.json",
         }
 
     def own_class(self):
@@ -298,7 +317,8 @@ class CampaignTest(EntityTest):
         return {
             "type": "Campagin",
             "name": "Green Group Attacks Against Finance",
-            "description": "Campaign by Green Group against a series of targets in the financial services sector.",
+            "description":
+            "Campaign by Green Group against a series of targets in the financial services sector.",
             "aliases": ["GREENEVIL", "GREVIL"],
             "confidence": 60,
             "first_seen": get_incident_start_date(),
@@ -315,7 +335,8 @@ class IncidentTest(EntityTest):
         return {
             "type": "Incident",
             "name": "Green Group Attacks Against Finance",
-            "description": "Incident by Green Group against a targets in the financial services sector.",
+            "description":
+            "Incident by Green Group against a targets in the financial services sector.",
             "aliases": ["GREENEVIL", "GREVIL"],
             "confidence": 60,
             "first_seen": get_incident_start_date(),
@@ -347,7 +368,8 @@ class IntrusionSetTest(EntityTest):
         return {
             "type": "IntrusionSet",
             "name": "Bobcat Breakin",
-            "description": "Incidents usually feature a shared TTP of a bobcat being released within the building containing network access, scaring users to leave their computers without locking them first. Still determining where the threat actors are getting the bobcats.",
+            "description":
+            "Incidents usually feature a shared TTP of a bobcat being released within the building containing network access, scaring users to leave their computers without locking them first. Still determining where the threat actors are getting the bobcats.",
             "aliases": ["Zookeeper"],
             "goals": ["acquisition-theft", "harassment", "damage"],
         }
@@ -525,15 +547,13 @@ class ObservedDataTest(EntityTest):
     def setup(self):
         self.ipv4 = self.api_client.stix_cyber_observable.create(
             simple_observable_id=OpenCTIStix2Utils.generate_random_stix_id(
-                "x-opencti-simple-observable"
-            ),
+                "x-opencti-simple-observable"),
             simple_observable_key="IPv4-Addr.value",
             simple_observable_value="198.51.100.3",
         )
         self.domain = self.api_client.stix_cyber_observable.create(
             simple_observable_id=OpenCTIStix2Utils.generate_random_stix_id(
-                "x-opencti-simple-observable"
-            ),
+                "x-opencti-simple-observable"),
             simple_observable_key="Domain-Name.value",
             simple_observable_value="example.com",
         )
@@ -566,7 +586,8 @@ class OpinionTest(EntityTest):
         return {
             "type": ContainerTypes.OPINION.value,
             "opinion": "strongly-disagree",
-            "explanation": "This doesn't seem like it is feasible. We've seen how PandaCat has attacked Spanish infrastructure over the last 3 years, so this change in targeting seems too great to be viable. The methods used are more commonly associated with the FlameDragonCrew.",
+            "explanation":
+            "This doesn't seem like it is feasible. We've seen how PandaCat has attacked Spanish infrastructure over the last 3 years, so this change in targeting seems too great to be viable. The methods used are more commonly associated with the FlameDragonCrew.",
             "confidence": 50,
             "authors": ["you"],
             # "lang": "en",
@@ -611,8 +632,10 @@ class StixCoreRelationshipTest(EntityTest):
         )
 
         self.ttp1 = self.api_client.attack_pattern.read(
-            filters=[{"key": "x_mitre_id", "values": ["T1193"]}]
-        )
+            filters=[{
+                "key": "x_mitre_id",
+                "values": ["T1193"]
+            }])
 
     def data(self) -> Dict:
         return {
@@ -660,15 +683,13 @@ class StixCyberObservableRelationshipTest(EntityTest):
     def setup(self):
         self.ipv4 = self.api_client.stix_cyber_observable.create(
             simple_observable_id=OpenCTIStix2Utils.generate_random_stix_id(
-                "x-opencti-simple-observable"
-            ),
+                "x-opencti-simple-observable"),
             simple_observable_key="IPv4-Addr.value",
             simple_observable_value="198.51.100.3",
         )
         self.domain = self.api_client.stix_cyber_observable.create(
             simple_observable_id=OpenCTIStix2Utils.generate_random_stix_id(
-                "x-opencti-simple-observable"
-            ),
+                "x-opencti-simple-observable"),
             simple_observable_key="Domain-Name.value",
             simple_observable_value="example.com",
         )
@@ -719,8 +740,10 @@ class StixCyberObservableRelationshipTest(EntityTest):
 class StixSightingRelationshipTest(EntityTest):
     def setup(self):
         self.ttp1 = self.api_client.attack_pattern.read(
-            filters=[{"key": "x_mitre_id", "values": ["T1193"]}]
-        )
+            filters=[{
+                "key": "x_mitre_id",
+                "values": ["T1193"]
+            }])
 
         self.location = self.api_client.location.create(
             **{
@@ -733,8 +756,7 @@ class StixSightingRelationshipTest(EntityTest):
                 "country": "th",
                 "administrative_area": "Tak",
                 "postal_code": "63170",
-            },
-        )
+            }, )
 
     def data(self) -> Dict:
         return {

@@ -21,11 +21,8 @@ class StixCoreObject:
         if id is not None and stix_core_objects_ids is not None:
             self.opencti.log(
                 "info",
-                "Merging Core object {"
-                + id
-                + "} with {"
-                + ",".join(stix_core_objects_ids)
-                + "}.",
+                "Merging Core object {" + id + "} with {" +
+                ",".join(stix_core_objects_ids) + "}.",
             )
             query = """
                     mutation StixCoreObjectEdit($id: ID!, $stixCoreObjectsIds: [String]!) {
@@ -46,8 +43,7 @@ class StixCoreObject:
                 },
             )
             return self.opencti.process_multiple_fields(
-                result["data"]["stixCoreObjectEdit"]["merge"]
-            )
+                result["data"]["stixCoreObjectEdit"]["merge"])
         else:
             self.opencti.log(
                 "error",
@@ -80,5 +76,6 @@ class StixCoreObject:
                     }
                 """
         result = self.opencti.query(query, {"id": id})
-        entity = self.opencti.process_multiple_fields(result["data"]["stixCoreObject"])
+        entity = self.opencti.process_multiple_fields(
+            result["data"]["stixCoreObject"])
         return entity["importFiles"]

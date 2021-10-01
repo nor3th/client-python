@@ -17,7 +17,6 @@ process = opencti_api_client.stix_cyber_observable.create(
         "pid": "19000",
         "command_line": "--run exe",
         "x_opencti_score": 90,
-    }
-)
+    })
 
 print(process)

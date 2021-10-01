@@ -24,13 +24,11 @@ report = opencti_api_client.report.create(
 
 # Create the external reference
 external_reference = opencti_api_client.external_reference.create(
-    source_name="Wikipedia", url="https://en.wikipedia.org/wiki/Fancy_Bear"
-)
+    source_name="Wikipedia", url="https://en.wikipedia.org/wiki/Fancy_Bear")
 
 # Add the external reference to the report
 opencti_api_client.stix_domain_object.add_external_reference(
-    id=report["id"], external_reference_id=external_reference["id"]
-)
+    id=report["id"], external_reference_id=external_reference["id"])
 
 # Get the report
 report = opencti_api_client.report.read(id=report["id"])

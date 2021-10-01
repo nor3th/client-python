@@ -5,16 +5,16 @@ from typing import Dict
 
 import pika.exceptions
 import yaml
-from stix2 import Vulnerability, Bundle, Report, Identity
+from stix2 import Bundle, Identity, Report, Vulnerability
 
 from pycti import (
-    OpenCTIConnectorHelper,
-    get_config_variable,
     OpenCTIApiClient,
-    SimpleObservable,
+    OpenCTIConnectorHelper,
     OpenCTIStix2Utils,
+    SimpleObservable,
+    get_config_variable,
 )
-from pycti.utils.constants import IdentityTypes, ContainerTypes
+from pycti.utils.constants import ContainerTypes, IdentityTypes
 
 
 class SimpleConnectorTest:
@@ -40,38 +40,42 @@ class ExternalImportConnectorTest:
                     "name": "Testing aaaaa",
                     "description": "OpenCTI Test Org",
                     "class": Identity,
-                    "id": OpenCTIStix2Utils.generate_random_stix_id("identity"),
+                    "id":
+                    OpenCTIStix2Utils.generate_random_stix_id("identity"),
                 },
                 {
-                    "type": "Vulnerability",
-                    "name": "CVE-1979-1234",
-                    "description": "evil evil evil",
-                    "class": Vulnerability,
-                    "id": OpenCTIStix2Utils.generate_random_stix_id("vulnerability"),
+                    "type":
+                    "Vulnerability",
+                    "name":
+                    "CVE-1979-1234",
+                    "description":
+                    "evil evil evil",
+                    "class":
+                    Vulnerability,
+                    "id":
+                    OpenCTIStix2Utils.generate_random_stix_id("vulnerability"),
                 },
             ],
-            "config": "tests/data/external_import_config.yml",
+            "config":
+            "tests/data/external_import_config.yml",
         }
 
 
 class ExternalImportConnector:
-    def __init__(self, config_file_path: str, api_client: OpenCTIApiClient, data: Dict):
+    def __init__(self, config_file_path: str, api_client: OpenCTIApiClient,
+                 data: Dict):
         # set OPENCTI settings from fixture
         os.environ["OPENCTI_URL"] = api_client.api_url
         os.environ["OPENCTI_TOKEN"] = api_client.api_token
         os.environ["OPENCTI_SSL_VERIFY"] = str(api_client.ssl_verify)
         os.environ["OPENCTI_JSON_LOGGING"] = "true"
 
-        config = (
-            yaml.load(open(config_file_path), Loader=yaml.FullLoader)
-            if os.path.isfile(config_file_path)
-            else {}
-        )
+        config = (yaml.load(open(config_file_path), Loader=yaml.FullLoader)
+                  if os.path.isfile(config_file_path) else {})
 
         self.helper = OpenCTIConnectorHelper(config)
-        self.interval = get_config_variable(
-            "INTERVAL", ["test", "interval"], config, True
-        )
+        self.interval = get_config_variable("INTERVAL", ["test", "interval"],
+                                            config, True)
 
         self.data = data
 
@@ -82,9 +86,8 @@ class ExternalImportConnector:
         now = datetime.utcfromtimestamp(time.time())
         now_time = now.strftime("%Y-%m-%d %H:%M:%S")
         friendly_name = f"{self.helper.connect_name} run @ {now_time}"
-        work_id = self.helper.api.work.initiate_work(
-            self.helper.connect_id, friendly_name
-        )
+        work_id = self.helper.api.work.initiate_work(self.helper.connect_id,
+                                                     friendly_name)
 
         bundle_objects = []
         for elem in self.data:
@@ -105,7 +108,8 @@ class ExternalImportConnector:
             work_id=work_id,
         )
 
-        message = "Connector successfully run, storing last_run as " + str(now_time)
+        message = "Connector successfully run, storing last_run as " + str(
+            now_time)
         self.helper.api.work.to_processed(work_id, message)
 
         return "Foo"
@@ -137,17 +141,15 @@ class InternalEnrichmentConnectorTest:
 
 
 class InternalEnrichmentConnector:
-    def __init__(self, config_file_path: str, api_client: OpenCTIApiClient, data: Dict):
+    def __init__(self, config_file_path: str, api_client: OpenCTIApiClient,
+                 data: Dict):
         # set OPENCTI settings from fixture
         os.environ["OPENCTI_URL"] = api_client.api_url
         os.environ["OPENCTI_TOKEN"] = api_client.api_token
         os.environ["OPENCTI_SSL_VERIFY"] = str(api_client.ssl_verify)
 
-        config = (
-            yaml.load(open(config_file_path), Loader=yaml.FullLoader)
-            if os.path.isfile(config_file_path)
-            else {}
-        )
+        config = (yaml.load(open(config_file_path), Loader=yaml.FullLoader)
+                  if os.path.isfile(config_file_path) else {})
 
         self.helper = OpenCTIConnectorHelper(config)
 
@@ -159,7 +161,10 @@ class InternalEnrichmentConnector:
 
         self.helper.api.stix_cyber_observable.update_field(
             id=observable["standard_id"],
-            input={"key": "x_opencti_score", "value": ["100"]},
+            input={
+                "key": "x_opencti_score",
+                "value": ["100"]
+            },
         )
 
         # now = datetime.utcfromtimestamp(time.time())
@@ -220,7 +225,8 @@ class InternalImportConnectorTest:
             "report": {
                 "type": ContainerTypes.REPORT.value,
                 "name": "The Black Vine Cyberespionage Group",
-                "description": "A simple report with an indicator and campaign",
+                "description":
+                "A simple report with an indicator and campaign",
                 "published": "2016-01-20T17:00:00.000Z",
                 "report_types": ["campaign"],
                 # "lang": "en",
@@ -230,17 +236,15 @@ class InternalImportConnectorTest:
 
 
 class InternalImportConnector:
-    def __init__(self, config_file_path: str, api_client: OpenCTIApiClient, data: Dict):
+    def __init__(self, config_file_path: str, api_client: OpenCTIApiClient,
+                 data: Dict):
         # set OPENCTI settings from fixture
         os.environ["OPENCTI_URL"] = api_client.api_url
         os.environ["OPENCTI_TOKEN"] = api_client.api_token
         os.environ["OPENCTI_SSL_VERIFY"] = str(api_client.ssl_verify)
 
-        config = (
-            yaml.load(open(config_file_path), Loader=yaml.FullLoader)
-            if os.path.isfile(config_file_path)
-            else {}
-        )
+        config = (yaml.load(open(config_file_path), Loader=yaml.FullLoader)
+                  if os.path.isfile(config_file_path) else {})
 
         self.helper = OpenCTIConnectorHelper(config)
         self.data = data
@@ -253,7 +257,8 @@ class InternalImportConnector:
         self.helper.log_info("Importing the file " + file_uri)
 
         observable = SimpleObservable(
-            id=OpenCTIStix2Utils.generate_random_stix_id("x-opencti-simple-observable"),
+            id=OpenCTIStix2Utils.generate_random_stix_id(
+                "x-opencti-simple-observable"),
             key=self.data["simple_observable_key"],
             value=self.data["simple_observable_value"],
         )

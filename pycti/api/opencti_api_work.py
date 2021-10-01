@@ -29,7 +29,11 @@ class OpenCTIApiWork:
                 }
             }
            """
-        self.api.query(query, {"id": work_id, "message": message, "inError": in_error})
+        self.api.query(query, {
+            "id": work_id,
+            "message": message,
+            "inError": in_error
+        })
 
     def report_expectation(self, work_id: str, error):
         logging.info("Report expectation for " + work_id)
@@ -46,9 +50,8 @@ class OpenCTIApiWork:
             self.api.log("error", "Cannot report expectation")
 
     def add_expectations(self, work_id: str, expectations: int):
-        logging.info(
-            "Update action expectations " + work_id + " - " + str(expectations)
-        )
+        logging.info("Update action expectations " + work_id + " - " +
+                     str(expectations))
         query = """
             mutation addExpectations($id: ID!, $expectations: Int) {
                 workEdit(id: $id) {
@@ -57,7 +60,10 @@ class OpenCTIApiWork:
             }
            """
         try:
-            self.api.query(query, {"id": work_id, "expectations": expectations})
+            self.api.query(query, {
+                "id": work_id,
+                "expectations": expectations
+            })
         except:
             self.api.log("error", "Cannot report expectation")
 
@@ -70,9 +76,10 @@ class OpenCTIApiWork:
                 }
             }
            """
-        work = self.api.query(
-            query, {"connectorId": connector_id, "friendlyName": friendly_name}
-        )
+        work = self.api.query(query, {
+            "connectorId": connector_id,
+            "friendlyName": friendly_name
+        })
         return work["data"]["workAdd"]["id"]
 
     def delete_work(self, work_id: str):
@@ -98,8 +105,8 @@ class OpenCTIApiWork:
 
                 if state["errors"]:
                     self.api.log(
-                        "error", f"Unexpected connector error {state['errors']}"
-                    )
+                        "error",
+                        f"Unexpected connector error {state['errors']}")
                     return ""
 
             time.sleep(1)
@@ -198,7 +205,10 @@ class OpenCTIApiWork:
             {
                 "count": 50,
                 "filters": [
-                    {"key": "connector_id", "values": [connector_id]},
+                    {
+                        "key": "connector_id",
+                        "values": [connector_id]
+                    },
                 ],
             },
         )

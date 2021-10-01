@@ -10,7 +10,5 @@ api_token = "YOUR_TOKEN"
 opencti_api_client = OpenCTIApiClient(api_url, api_token)
 
 # Upload the file
-file = opencti_api_client.upload_file(
-    file_name="./file.pdf",
-)
+file = opencti_api_client.upload_file(file_name="./file.pdf", )
 print(file)

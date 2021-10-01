@@ -41,6 +41,5 @@ def test_indicator_stix_marshall(api_client):
 
     for indic in json_data["objects"]:
         imported_indicator = api_client.indicator.import_from_stix2(
-            stixObject=indic, update=True
-        )
+            stixObject=indic, update=True)
         assert imported_indicator is not None

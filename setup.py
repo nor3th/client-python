@@ -24,8 +24,7 @@ class VerifyVersionCommand(install):
         tag = os.getenv("CIRCLE_TAG")
         if tag != VERSION:
             info = "Git tag: {0} does not match the version of this app: {1}".format(
-                tag, VERSION
-            )
+                tag, VERSION)
             sys.exit(info)
 
 
@@ -41,7 +40,10 @@ setup(
     maintainer="OpenCTI",
     url="https://github.com/OpenCTI-Platform/client-python",
     license="Apache",
-    packages=["pycti", "pycti.api", "pycti.connector", "pycti.entities", "pycti.utils"],
+    packages=[
+        "pycti", "pycti.api", "pycti.connector", "pycti.entities",
+        "pycti.utils"
+    ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",

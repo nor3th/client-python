@@ -13,12 +13,14 @@ observable = opencti_api_client.stix_cyber_observable.create(
     observableData={
         "type": "file",
         "hashes": {
-            "md5": "16b3f663d0f0371a4706642c6ac04e42",
-            "sha1": "3a1f908941311fc357051b5c35fd2a4e0c834e37",
-            "sha256": "bcc70a49fab005b4cdbe0cbd87863ec622c6b2c656987d201adbb0e05ec03e56",
+            "md5":
+            "16b3f663d0f0371a4706642c6ac04e42",
+            "sha1":
+            "3a1f908941311fc357051b5c35fd2a4e0c834e37",
+            "sha256":
+            "bcc70a49fab005b4cdbe0cbd87863ec622c6b2c656987d201adbb0e05ec03e56",
         },
-    }
-)
+    })
 
 process = opencti_api_client.stix_cyber_observable.create(
     observableData={
@@ -28,8 +30,7 @@ process = opencti_api_client.stix_cyber_observable.create(
         "pid": "19000",
         "command_line": "--run exe",
         "x_opencti_score": 90,
-    }
-)
+    })
 
 author = opencti_api_client.identity.create(
     name="John's Work",

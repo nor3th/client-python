@@ -1,5 +1,6 @@
 import pytest
 from pytest_cases import fixture
+
 from pycti import (
     OpenCTIApiClient,
     OpenCTIApiConnector,
@@ -39,13 +40,15 @@ def opencti_splitter():
 
 
 def pytest_addoption(parser):
-    parser.addoption(
-        "--connectors", action="store_true", default=False, help="run connector tests"
-    )
+    parser.addoption("--connectors",
+                     action="store_true",
+                     default=False,
+                     help="run connector tests")
 
 
 def pytest_configure(config):
-    config.addinivalue_line("markers", "connectors: mark connector tests to run")
+    config.addinivalue_line("markers",
+                            "connectors: mark connector tests to run")
 
 
 def pytest_collection_modifyitems(config, items):

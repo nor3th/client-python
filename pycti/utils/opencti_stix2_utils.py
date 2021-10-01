@@ -48,14 +48,12 @@ class OpenCTIStix2Utils:
     def create_stix_pattern(observable_type, observable_value):
         if observable_type in PATTERN_MAPPING:
             lhs = ObjectPath(
-                observable_type.lower()
-                if "_" not in observable_type
-                else observable_type.split("_")[0].lower(),
+                observable_type.lower() if "_" not in observable_type else
+                observable_type.split("_")[0].lower(),
                 PATTERN_MAPPING[observable_type],
             )
             ece = ObservationExpression(
-                EqualityComparisonExpression(lhs, observable_value)
-            )
+                EqualityComparisonExpression(lhs, observable_value))
             return str(ece)
         else:
             return None
@@ -80,7 +78,8 @@ class OpenCTIStix2Utils:
         ("description", properties.StringProperty()),
         (
             "created_by_ref",
-            properties.ReferenceProperty(valid_types="identity", spec_version="2.1"),
+            properties.ReferenceProperty(valid_types="identity",
+                                         spec_version="2.1"),
         ),
         ("x_opencti_score", properties.IntegerProperty()),
         ("x_opencti_create_indicator", properties.BooleanProperty()),
@@ -89,10 +88,8 @@ class OpenCTIStix2Utils:
         (
             "object_marking_refs",
             properties.ListProperty(
-                properties.ReferenceProperty(
-                    valid_types="marking-definition", spec_version="2.1"
-                )
-            ),
+                properties.ReferenceProperty(valid_types="marking-definition",
+                                             spec_version="2.1")),
         ),
     ],
 )
@@ -105,23 +102,23 @@ class SimpleObservable:
     [
         ("name", properties.StringProperty(required=True)),
         ("description", properties.StringProperty()),
-        ("aliases", properties.ListProperty(contained=properties.StringProperty())),
+        ("aliases",
+         properties.ListProperty(contained=properties.StringProperty())),
         ("first_seen", properties.TimestampProperty()),
         ("last_seen", properties.TimestampProperty()),
         ("objective", properties.StringProperty()),
         (
             "created_by_ref",
-            properties.ReferenceProperty(valid_types="identity", spec_version="2.1"),
+            properties.ReferenceProperty(valid_types="identity",
+                                         spec_version="2.1"),
         ),
         ("labels", properties.ListProperty(properties.StringProperty)),
         ("external_references", properties.ListProperty(ExternalReference)),
         (
             "object_marking_refs",
             properties.ListProperty(
-                properties.ReferenceProperty(
-                    valid_types="marking-definition", spec_version="2.1"
-                )
-            ),
+                properties.ReferenceProperty(valid_types="marking-definition",
+                                             spec_version="2.1")),
         ),
     ],
 )

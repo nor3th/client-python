@@ -11,22 +11,25 @@ opencti_api_client = OpenCTIApiClient(api_url, api_token)
 
 # Exact IP match
 opencti_api_client.stix_cyber_observable.create(
-    simple_observable_key="IPv4-Addr.value", simple_observable_value="110.172.180.180"
-)
+    simple_observable_key="IPv4-Addr.value",
+    simple_observable_value="110.172.180.180")
 print("IP ADDRESS")
 observable = opencti_api_client.stix_cyber_observable.read(
-    filters=[{"key": "value", "values": ["110.172.180.180"]}]
-)
+    filters=[{
+        "key": "value",
+        "values": ["110.172.180.180"]
+    }])
 print(observable)
 
 # Exact File name match
 opencti_api_client.stix_cyber_observable.create(
-    simple_observable_key="File.name", simple_observable_value="activeds.dll"
-)
+    simple_observable_key="File.name", simple_observable_value="activeds.dll")
 print("FILE NAME")
 observable = opencti_api_client.stix_cyber_observable.read(
-    filters=[{"key": "name", "values": ["activeds.dll"]}]
-)
+    filters=[{
+        "key": "name",
+        "values": ["activeds.dll"]
+    }])
 print(observable)
 
 # Exact File name match
@@ -36,6 +39,8 @@ opencti_api_client.stix_cyber_observable.create(
 )
 print("FILE MD5")
 observable = opencti_api_client.stix_cyber_observable.read(
-    filters=[{"key": "hashes_MD5", "values": ["3aad33e025303dbae12c12b4ec5258c1"]}]
-)
+    filters=[{
+        "key": "hashes_MD5",
+        "values": ["3aad33e025303dbae12c12b4ec5258c1"]
+    }])
 print(observable)

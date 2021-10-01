@@ -14,9 +14,5 @@ marking_definitions = opencti_api_client.marking_definition.list()
 
 # Print
 for marking_definition in marking_definitions:
-    print(
-        "["
-        + marking_definition["definition_type"]
-        + "] "
-        + marking_definition["definition"]
-    )
+    print("[" + marking_definition["definition_type"] + "] " +
+          marking_definition["definition"])

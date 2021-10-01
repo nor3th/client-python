@@ -17,8 +17,7 @@ observable = opencti_api_client.stix_cyber_observable.create(
     **{
         "simple_observable_key": "IPv4-Addr.value",
         "simple_observable_value": "8.8.4.4",
-    }
-)
+    })
 
 # Get connector id for defined connector name
 connector_list = opencti_api_connector.list()
@@ -37,8 +36,7 @@ if connector_id == "":
 print("Asking for enrichment... (this might take a bit to finish)")
 # Ask for enrichment
 work_id = opencti_api_client.stix_cyber_observable.ask_for_enrichment(
-    id=observable["id"], connector_id=connector_id
-)
+    id=observable["id"], connector_id=connector_id)
 # Wait for connector to finish
 opencti_api_work.wait_for_work_to_finish(work_id)
 

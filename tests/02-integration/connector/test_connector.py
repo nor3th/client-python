@@ -1,20 +1,18 @@
 import pika.exceptions
 import pytest
-from pytest_cases import parametrize_with_cases, fixture
+from pytest_cases import fixture, parametrize_with_cases
+
 from pycti import OpenCTIConnector
 from tests.cases.connectors import (
     ExternalImportConnector,
-    SimpleConnectorTest,
-    InternalEnrichmentConnector,
     ExternalImportConnectorTest,
+    InternalEnrichmentConnector,
     InternalEnrichmentConnectorTest,
-    InternalImportConnectorTest,
     InternalImportConnector,
+    InternalImportConnectorTest,
+    SimpleConnectorTest,
 )
-from tests.utils import (
-    get_connector_id,
-    get_new_work_id,
-)
+from tests.utils import get_connector_id, get_new_work_id
 
 
 @fixture
@@ -42,9 +40,8 @@ def test_register_simple_connector(simple_connector, api_connector, api_work):
             test_connector = registered_connector["id"]
             break
 
-    assert (
-        test_connector == my_connector_id
-    ), f"No registered connector with id '{my_connector_id}' found"
+    assert (test_connector == my_connector_id
+            ), f"No registered connector with id '{my_connector_id}' found"
 
     api_connector.unregister(test_connector)
 
@@ -61,7 +58,8 @@ def test_register_simple_connector(simple_connector, api_connector, api_work):
 @fixture
 @parametrize_with_cases("data", cases=ExternalImportConnectorTest)
 def external_import_connector_data(data, api_client, api_connector, api_work):
-    connector = ExternalImportConnector(data["config"], api_client, data["data"])
+    connector = ExternalImportConnector(data["config"], api_client,
+                                        data["data"])
     connector.run()
     yield data["data"]
     connector.stop()
@@ -73,9 +71,8 @@ def external_import_connector_data(data, api_client, api_connector, api_work):
 
 
 @pytest.mark.connectors
-def test_external_import_connector(
-    external_import_connector_data, api_client, api_connector, api_work
-):
+def test_external_import_connector(external_import_connector_data, api_client,
+                                   api_connector, api_work):
     connector_name = "TestExternalImport"
     connector_id = get_connector_id(connector_name, api_connector)
     assert connector_id != "", f"{connector_name} could not be found!"
@@ -95,32 +92,35 @@ def test_external_import_connector(
 
     for elem in external_import_connector_data:
         sdo = api_client.stix_domain_object.read(
-            filters=[{"key": "name", "values": elem["name"]}]
-        )
+            filters=[{
+                "key": "name",
+                "values": elem["name"]
+            }])
         if sdo is None:
             continue
         assert (
             sdo is not None
         ), f"Connector was unable to create {elem['type']} via the Bundle"
-        assert (
-            sdo["entity_type"] == elem["type"]
-        ), f"A different {elem['type']} type was created"
+        assert (sdo["entity_type"] == elem["type"]
+                ), f"A different {elem['type']} type was created"
 
         api_client.stix_domain_object.delete(id=sdo["id"])
 
 
 @fixture
 @parametrize_with_cases("data", cases=InternalEnrichmentConnectorTest)
-def internal_enrichment_connector_data(data, api_client, api_connector, api_work):
-    enrichment_connector = InternalEnrichmentConnector(
-        data["config"], api_client, data["data"]
-    )
+def internal_enrichment_connector_data(data, api_client, api_connector,
+                                       api_work):
+    enrichment_connector = InternalEnrichmentConnector(data["config"],
+                                                       api_client,
+                                                       data["data"])
 
     try:
         enrichment_connector.start()
     except pika.exceptions.AMQPConnectionError:
         enrichment_connector.stop()
-        raise ValueError("Connector was not able to establish the connection to pika")
+        raise ValueError(
+            "Connector was not able to establish the connection to pika")
 
     observable = api_client.stix_cyber_observable.create(**data["data"])
     yield observable["id"]
@@ -129,15 +129,15 @@ def internal_enrichment_connector_data(data, api_client, api_connector, api_work
     enrichment_connector.stop()
 
     # Cleanup finished works
-    works = api_work.get_connector_works(enrichment_connector.helper.connector_id)
+    works = api_work.get_connector_works(
+        enrichment_connector.helper.connector_id)
     for work in works:
         api_work.delete_work(work["id"])
 
 
 @pytest.mark.connectors
-def test_internal_enrichment_connector(
-    internal_enrichment_connector_data, api_connector, api_work, api_client
-):
+def test_internal_enrichment_connector(internal_enrichment_connector_data,
+                                       api_connector, api_work, api_client):
     # Rename variable
     observable_id = internal_enrichment_connector_data
     observable = api_client.stix_cyber_observable.read(id=observable_id)
@@ -150,8 +150,7 @@ def test_internal_enrichment_connector(
     assert connector_id != "", f"{connector_name} could not be found!"
 
     work_id = api_client.stix_cyber_observable.ask_for_enrichment(
-        id=observable_id, connector_id=connector_id
-    )
+        id=observable_id, connector_id=connector_id)
 
     # Wait for enrichment to finish
     api_work.wait_for_work_to_finish(work_id)
@@ -165,9 +164,8 @@ def test_internal_enrichment_connector(
 @fixture
 @parametrize_with_cases("data", cases=InternalImportConnectorTest)
 def internal_import_connector_data(data, api_client, api_connector, api_work):
-    import_connector = InternalImportConnector(
-        data["config"], api_client, data["observable"]
-    )
+    import_connector = InternalImportConnector(data["config"], api_client,
+                                               data["observable"])
     import_connector.start()
 
     report = api_client.report.create(**data["report"])
@@ -184,9 +182,8 @@ def internal_import_connector_data(data, api_client, api_connector, api_work):
 
 
 @pytest.mark.connectors
-def test_internal_import_connector(
-    internal_import_connector_data, api_connector, api_work, api_client
-):
+def test_internal_import_connector(internal_import_connector_data,
+                                   api_connector, api_work, api_client):
     # Rename variable
     report_id, data = internal_import_connector_data
     observable_data = data["observable"]
@@ -222,11 +219,9 @@ def test_internal_import_connector(
     observable_id = report["objects"][0]["id"]
     observable = api_client.stix_cyber_observable.read(id=observable_id)
     observable_type = observable_data["simple_observable_key"].split(".")[0]
-    assert (
-        observable["entity_type"] == observable_type
-    ), f"Unexpected Observable type, received {observable_type}"
-    assert (
-        observable["value"] == observable_data["simple_observable_value"]
-    ), f"Unexpected Observable value, received {observable['value']}"
+    assert (observable["entity_type"] == observable_type
+            ), f"Unexpected Observable type, received {observable_type}"
+    assert (observable["value"] == observable_data["simple_observable_value"]
+            ), f"Unexpected Observable value, received {observable['value']}"
 
     api_client.stix_cyber_observable.delete(id=observable_id)

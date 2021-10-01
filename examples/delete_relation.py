@@ -11,9 +11,8 @@ opencti_api_client = OpenCTIApiClient(api_url, api_token)
 
 intrusion_set = opencti_api_client.intrusion_set.create(name="EvilSET123")
 
-malware = opencti_api_client.malware.create(
-    name="TheWorm", description="A new evil worm."
-)
+malware = opencti_api_client.malware.create(name="TheWorm",
+                                            description="A new evil worm.")
 
 opencti_api_client.stix_core_relationship.create(
     fromId=intrusion_set["id"],

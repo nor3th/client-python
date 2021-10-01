@@ -150,17 +150,15 @@ class Location:
             first = 500
 
         self.opencti.log(
-            "info", "Listing Locations with filters " + json.dumps(filters) + "."
-        )
-        query = (
-            """
+            "info",
+            "Listing Locations with filters " + json.dumps(filters) + ".")
+        query = ("""
             query Locations($types: [String], $filters: [LocationsFiltering], $search: String, $first: Int, $after: ID, $orderBy: LocationsOrdering, $orderMode: OrderingMode) {
                 locations(types: $types, filters: $filters, search: $search, first: $first, after: $after, orderBy: $orderBy, orderMode: $orderMode) {
                     edges {
                         node {
-                            """
-            + (custom_attributes if custom_attributes is not None else self.properties)
-            + """
+                            """ + (custom_attributes if custom_attributes
+                                   is not None else self.properties) + """
                         }
                     }
                     pageInfo {
@@ -172,8 +170,7 @@ class Location:
                     }
                 }
             }
-        """
-        )
+        """)
         result = self.opencti.query(
             query,
             {
@@ -186,9 +183,8 @@ class Location:
                 "orderMode": order_mode,
             },
         )
-        return self.opencti.process_multiple(
-            result["data"]["locations"], with_pagination
-        )
+        return self.opencti.process_multiple(result["data"]["locations"],
+                                             with_pagination)
 
     """
         Read a Location object
@@ -204,23 +200,17 @@ class Location:
         custom_attributes = kwargs.get("customAttributes", None)
         if id is not None:
             self.opencti.log("info", "Reading Location {" + id + "}.")
-            query = (
-                """
+            query = ("""
                 query Location($id: String!) {
                     location(id: $id) {
-                        """
-                + (
-                    custom_attributes
-                    if custom_attributes is not None
-                    else self.properties
-                )
-                + """
+                        """ + (custom_attributes if custom_attributes
+                               is not None else self.properties) + """
                     }
                 }
-             """
-            )
+             """)
             result = self.opencti.query(query, {"id": id})
-            return self.opencti.process_multiple_fields(result["data"]["location"])
+            return self.opencti.process_multiple_fields(
+                result["data"]["location"])
         elif filters is not None:
             result = self.list(filters=filters)
             if len(result) > 0:
@@ -229,8 +219,8 @@ class Location:
                 return None
         else:
             self.opencti.log(
-                "error", "[opencti_location] Missing parameters: id or filters"
-            )
+                "error",
+                "[opencti_location] Missing parameters: id or filters")
             return None
 
     """
@@ -299,7 +289,8 @@ class Location:
                     }
                 },
             )
-            return self.opencti.process_multiple_fields(result["data"]["locationAdd"])
+            return self.opencti.process_multiple_fields(
+                result["data"]["locationAdd"])
         else:
             self.opencti.log("error", "Missing parameters: name")
 
@@ -341,44 +332,37 @@ class Location:
                 type=type,
                 stix_id=stix_object["id"],
                 createdBy=extras["created_by_id"]
-                if "created_by_id" in extras
-                else None,
+                if "created_by_id" in extras else None,
                 objectMarking=extras["object_marking_ids"]
-                if "object_marking_ids" in extras
-                else [],
+                if "object_marking_ids" in extras else [],
                 objectLabel=extras["object_label_ids"]
-                if "object_label_ids" in extras
-                else [],
+                if "object_label_ids" in extras else [],
                 externalReferences=extras["external_references_ids"]
-                if "external_references_ids" in extras
-                else [],
-                revoked=stix_object["revoked"] if "revoked" in stix_object else None,
+                if "external_references_ids" in extras else [],
+                revoked=stix_object["revoked"]
+                if "revoked" in stix_object else None,
                 confidence=stix_object["confidence"]
-                if "confidence" in stix_object
-                else None,
+                if "confidence" in stix_object else None,
                 lang=stix_object["lang"] if "lang" in stix_object else None,
-                created=stix_object["created"] if "created" in stix_object else None,
-                modified=stix_object["modified"] if "modified" in stix_object else None,
+                created=stix_object["created"]
+                if "created" in stix_object else None,
+                modified=stix_object["modified"]
+                if "modified" in stix_object else None,
                 name=name,
                 description=self.opencti.stix2.convert_markdown(
-                    stix_object["description"]
-                )
-                if "description" in stix_object
-                else "",
-                latitude=stix_object["latitude"] if "latitude" in stix_object else None,
+                    stix_object["description"])
+                if "description" in stix_object else "",
+                latitude=stix_object["latitude"]
+                if "latitude" in stix_object else None,
                 longitude=stix_object["longitude"]
-                if "longitude" in stix_object
-                else None,
+                if "longitude" in stix_object else None,
                 precision=stix_object["precision"]
-                if "precision" in stix_object
-                else None,
+                if "precision" in stix_object else None,
                 x_opencti_stix_ids=stix_object["x_opencti_stix_ids"]
-                if "x_opencti_stix_ids" in stix_object
-                else None,
+                if "x_opencti_stix_ids" in stix_object else None,
                 x_opencti_aliases=self.opencti.stix2.pick_aliases(stix_object),
                 update=update,
             )
         else:
             self.opencti.log(
-                "error", "[opencti_location] Missing parameters: stixObject"
-            )
+                "error", "[opencti_location] Missing parameters: stixObject")

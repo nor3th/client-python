@@ -479,27 +479,18 @@ class StixObjectOrStixRelationship:
         custom_attributes = kwargs.get("customAttributes", None)
         if id is not None:
             self.opencti.log(
-                "info", "Reading StixObjectOrStixRelationship {" + id + "}."
-            )
-            query = (
-                """
+                "info", "Reading StixObjectOrStixRelationship {" + id + "}.")
+            query = ("""
                 query StixObjectOrStixRelationship($id: String!) {
                     stixObjectOrStixRelationship(id: $id) {
-                        """
-                + (
-                    custom_attributes
-                    if custom_attributes is not None
-                    else self.properties
-                )
-                + """
+                        """ + (custom_attributes if custom_attributes
+                               is not None else self.properties) + """
                     }
                 }
-             """
-            )
+             """)
             result = self.opencti.query(query, {"id": id})
             return self.opencti.process_multiple_fields(
-                result["data"]["stixObjectOrStixRelationship"]
-            )
+                result["data"]["stixObjectOrStixRelationship"])
         else:
             self.opencti.log("error", "Missing parameters: id")
             return None

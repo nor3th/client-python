@@ -2,6 +2,7 @@
 
 import json
 import os
+
 import magic
 
 
@@ -425,17 +426,16 @@ class StixDomainObject:
 
         self.opencti.log(
             "info",
-            "Listing Stix-Domain-Objects with filters " + json.dumps(filters) + ".",
+            "Listing Stix-Domain-Objects with filters " + json.dumps(filters) +
+            ".",
         )
-        query = (
-            """
+        query = ("""
                 query StixDomainObjects($types: [String], $filters: [StixDomainObjectsFiltering], $search: String, $first: Int, $after: ID, $orderBy: StixDomainObjectsOrdering, $orderMode: OrderingMode) {
                     stixDomainObjects(types: $types, filters: $filters, search: $search, first: $first, after: $after, orderBy: $orderBy, orderMode: $orderMode) {
                         edges {
                             node {
-                                """
-            + (custom_attributes if custom_attributes is not None else self.properties)
-            + """
+                                """ + (custom_attributes if custom_attributes
+                                       is not None else self.properties) + """
                         }
                     }
                     pageInfo {
@@ -447,8 +447,7 @@ class StixDomainObject:
                     }
                 }
             }
-        """
-        )
+        """)
         result = self.opencti.query(
             query,
             {
@@ -464,11 +463,15 @@ class StixDomainObject:
 
         if get_all:
             final_data = []
-            data = self.opencti.process_multiple(result["data"]["stixDomainObjects"])
+            data = self.opencti.process_multiple(
+                result["data"]["stixDomainObjects"])
             final_data = final_data + data
-            while result["data"]["stixDomainObjects"]["pageInfo"]["hasNextPage"]:
-                after = result["data"]["stixDomainObjects"]["pageInfo"]["endCursor"]
-                self.opencti.log("info", "Listing Stix-Domain-Entities after " + after)
+            while result["data"]["stixDomainObjects"]["pageInfo"][
+                    "hasNextPage"]:
+                after = result["data"]["stixDomainObjects"]["pageInfo"][
+                    "endCursor"]
+                self.opencti.log("info",
+                                 "Listing Stix-Domain-Entities after " + after)
                 result = self.opencti.query(
                     query,
                     {
@@ -482,14 +485,12 @@ class StixDomainObject:
                     },
                 )
                 data = self.opencti.process_multiple(
-                    result["data"]["stixDomainObjects"]
-                )
+                    result["data"]["stixDomainObjects"])
                 final_data = final_data + data
             return final_data
         else:
             return self.opencti.process_multiple(
-                result["data"]["stixDomainObjects"], with_pagination
-            )
+                result["data"]["stixDomainObjects"], with_pagination)
 
     """
         Read a Stix-Domain-Object object
@@ -506,30 +507,23 @@ class StixDomainObject:
         filters = kwargs.get("filters", None)
         custom_attributes = kwargs.get("customAttributes", None)
         if id is not None:
-            self.opencti.log("info", "Reading Stix-Domain-Object {" + id + "}.")
-            query = (
-                """
+            self.opencti.log("info",
+                             "Reading Stix-Domain-Object {" + id + "}.")
+            query = ("""
                     query StixDomainObject($id: String!) {
                         stixDomainObject(id: $id) {
-                            """
-                + (
-                    custom_attributes
-                    if custom_attributes is not None
-                    else self.properties
-                )
-                + """
+                            """ + (custom_attributes if custom_attributes
+                                   is not None else self.properties) + """
                     }
                 }
-             """
-            )
+             """)
             result = self.opencti.query(query, {"id": id})
             return self.opencti.process_multiple_fields(
-                result["data"]["stixDomainObject"]
-            )
+                result["data"]["stixDomainObject"])
         elif filters is not None:
-            result = self.list(
-                types=types, filters=filters, customAttributes=custom_attributes
-            )
+            result = self.list(types=types,
+                               filters=filters,
+                               customAttributes=custom_attributes)
             if len(result) > 0:
                 return result[0]
             else:
@@ -559,25 +553,35 @@ class StixDomainObject:
         custom_attributes = kwargs.get("customAttributes", None)
         object_result = None
         if stix_id is not None:
-            object_result = self.read(id=stix_id, customAttributes=custom_attributes)
+            object_result = self.read(id=stix_id,
+                                      customAttributes=custom_attributes)
         if object_result is None and name is not None:
             # TODO: Change this logic and move it to the API.
             object_result = self.read(
                 types=types,
-                filters=[{"key": "name", "values": [name]}],
+                filters=[{
+                    "key": "name",
+                    "values": [name]
+                }],
                 customAttributes=custom_attributes,
             )
             if object_result is None:
                 object_result = self.read(
                     types=types,
-                    filters=[{"key": field_name, "values": [name]}],
+                    filters=[{
+                        "key": field_name,
+                        "values": [name]
+                    }],
                     customAttributes=custom_attributes,
                 )
                 if object_result is None:
                     for alias in aliases:
                         object_result = self.read(
                             types=types,
-                            filters=[{"key": field_name, "values": [alias]}],
+                            filters=[{
+                                "key": field_name,
+                                "values": [alias]
+                            }],
                             customAttributes=custom_attributes,
                         )
         return object_result
@@ -593,7 +597,8 @@ class StixDomainObject:
         id = kwargs.get("id", None)
         input = kwargs.get("input", None)
         if id is not None and input is not None:
-            self.opencti.log("info", "Updating Stix-Domain-Object {" + id + "}")
+            self.opencti.log("info",
+                             "Updating Stix-Domain-Object {" + id + "}")
             query = """
                     mutation StixDomainObjectEdit($id: ID!, $input: [EditInput]!) {
                         stixDomainObjectEdit(id: $id) {
@@ -613,8 +618,7 @@ class StixDomainObject:
                 },
             )
             return self.opencti.process_multiple_fields(
-                result["data"]["stixDomainObjectEdit"]["fieldPatch"]
-            )
+                result["data"]["stixDomainObjectEdit"]["fieldPatch"])
         else:
             self.opencti.log(
                 "error",
@@ -632,7 +636,8 @@ class StixDomainObject:
     def delete(self, **kwargs):
         id = kwargs.get("id", None)
         if id is not None:
-            self.opencti.log("info", "Deleting Stix-Domain-Object {" + id + "}.")
+            self.opencti.log("info",
+                             "Deleting Stix-Domain-Object {" + id + "}.")
             query = """
                  mutation StixDomainObjectEdit($id: ID!) {
                      stixDomainObjectEdit(id: $id) {
@@ -643,8 +648,7 @@ class StixDomainObject:
             self.opencti.query(query, {"id": id})
         else:
             self.opencti.log(
-                "error", "[opencti_stix_domain_object] Missing parameters: id"
-            )
+                "error", "[opencti_stix_domain_object] Missing parameters: id")
             return None
 
     """
@@ -674,8 +678,8 @@ class StixDomainObject:
                 return current_files[final_file_name]
             else:
                 self.opencti.log(
-                    "info", "Uploading a file in Stix-Domain-Object {" + id + "}."
-                )
+                    "info",
+                    "Uploading a file in Stix-Domain-Object {" + id + "}.")
                 query = """
                     mutation StixDomainObjectEdit($id: ID!, $file: Upload!) {
                         stixDomainObjectEdit(id: $id) {
@@ -695,7 +699,10 @@ class StixDomainObject:
 
                 return self.opencti.query(
                     query,
-                    {"id": id, "file": (self.file(final_file_name, data, mime_type))},
+                    {
+                        "id": id,
+                        "file": (self.file(final_file_name, data, mime_type))
+                    },
                 )
         else:
             self.opencti.log(
@@ -727,9 +734,10 @@ class StixDomainObject:
                 }
             } 
         """
-        self.opencti.query(
-            query, {"id": entity_id, "file": (self.file(file_name, data))}
-        )
+        self.opencti.query(query, {
+            "id": entity_id,
+            "file": (self.file(file_name, data))
+        })
 
     """
         Update the Identity author of a Stix-Domain-Object object (created_by)
@@ -745,11 +753,8 @@ class StixDomainObject:
         if id is not None:
             self.opencti.log(
                 "info",
-                "Updating author of Stix-Domain-Object {"
-                + id
-                + "} with Identity {"
-                + str(identity_id)
-                + "}",
+                "Updating author of Stix-Domain-Object {" + id +
+                "} with Identity {" + str(identity_id) + "}",
             )
             custom_attributes = """
                 id
@@ -775,7 +780,8 @@ class StixDomainObject:
                     }
                 }
             """
-            stix_domain_object = self.read(id=id, customAttributes=custom_attributes)
+            stix_domain_object = self.read(id=id,
+                                           customAttributes=custom_attributes)
             if stix_domain_object["createdBy"] is not None:
                 query = """
                     mutation StixDomainObjectEdit($id: ID!, $toId: String! $relationship_type: String!) {
@@ -847,22 +853,19 @@ class StixDomainObject:
                     }
                 }
             """
-            stix_domain_object = self.read(id=id, customAttributes=custom_attributes)
+            stix_domain_object = self.read(id=id,
+                                           customAttributes=custom_attributes)
             if stix_domain_object is None:
                 self.opencti.log(
-                    "error", "Cannot add Marking-Definition, entity not found"
-                )
+                    "error", "Cannot add Marking-Definition, entity not found")
                 return False
             if marking_definition_id in stix_domain_object["objectMarkingIds"]:
                 return True
             else:
                 self.opencti.log(
                     "info",
-                    "Adding Marking-Definition {"
-                    + marking_definition_id
-                    + "} to Stix-Domain-Object {"
-                    + id
-                    + "}",
+                    "Adding Marking-Definition {" + marking_definition_id +
+                    "} to Stix-Domain-Object {" + id + "}",
                 )
                 query = """
                    mutation StixDomainObjectAddRelation($id: ID!, $input: StixMetaRelationshipAddInput) {
@@ -886,8 +889,7 @@ class StixDomainObject:
                 return True
         else:
             self.opencti.log(
-                "error", "Missing parameters: id and marking_definition_id"
-            )
+                "error", "Missing parameters: id and marking_definition_id")
             return False
 
     """
@@ -904,11 +906,8 @@ class StixDomainObject:
         if id is not None and marking_definition_id is not None:
             self.opencti.log(
                 "info",
-                "Removing Marking-Definition {"
-                + marking_definition_id
-                + "} from Stix-Domain-Object {"
-                + id
-                + "}",
+                "Removing Marking-Definition {" + marking_definition_id +
+                "} from Stix-Domain-Object {" + id + "}",
             )
             query = """
                mutation StixDomainObjectRemoveRelation($id: ID!, $toId: String!, $relationship_type: String!) {
@@ -945,9 +944,10 @@ class StixDomainObject:
         label_id = kwargs.get("label_id", None)
         label_name = kwargs.get("label_name", None)
         if label_name is not None:
-            label = self.opencti.label.read(
-                filters=[{"key": "value", "values": [label_name]}]
-            )
+            label = self.opencti.label.read(filters=[{
+                "key": "value",
+                "values": [label_name]
+            }])
             if label:
                 label_id = label["id"]
             else:
@@ -956,7 +956,8 @@ class StixDomainObject:
         if id is not None and label_id is not None:
             self.opencti.log(
                 "info",
-                "Adding label {" + label_id + "} to Stix-Domain-Object {" + id + "}",
+                "Adding label {" + label_id + "} to Stix-Domain-Object {" +
+                id + "}",
             )
             query = """
                mutation StixDomainObjectAddRelation($id: ID!, $input: StixMetaRelationshipAddInput) {
@@ -995,15 +996,17 @@ class StixDomainObject:
         label_id = kwargs.get("label_id", None)
         label_name = kwargs.get("label_name", None)
         if label_name is not None:
-            label = self.opencti.label.read(
-                filters=[{"key": "value", "values": [label_name]}]
-            )
+            label = self.opencti.label.read(filters=[{
+                "key": "value",
+                "values": [label_name]
+            }])
             if label:
                 label_id = label["id"]
         if id is not None and label_id is not None:
             self.opencti.log(
                 "info",
-                "Removing label {" + label_id + "} to Stix-Domain-Object {" + id + "}",
+                "Removing label {" + label_id + "} to Stix-Domain-Object {" +
+                id + "}",
             )
             query = """
                mutation StixDomainObjectRemoveRelation($id: ID!, $toId: String!, $relationship_type: String!) {
@@ -1041,11 +1044,8 @@ class StixDomainObject:
         if id is not None and external_reference_id is not None:
             self.opencti.log(
                 "info",
-                "Adding External-Reference {"
-                + external_reference_id
-                + "} to Stix-Domain-Object {"
-                + id
-                + "}",
+                "Adding External-Reference {" + external_reference_id +
+                "} to Stix-Domain-Object {" + id + "}",
             )
             query = """
                mutation StixDomainObjectEditRelationAdd($id: ID!, $input: StixMetaRelationshipAddInput) {
@@ -1069,8 +1069,7 @@ class StixDomainObject:
             return True
         else:
             self.opencti.log(
-                "error", "Missing parameters: id and external_reference_id"
-            )
+                "error", "Missing parameters: id and external_reference_id")
             return False
 
     """
@@ -1087,11 +1086,8 @@ class StixDomainObject:
         if id is not None and external_reference_id is not None:
             self.opencti.log(
                 "info",
-                "Removing External-Reference {"
-                + external_reference_id
-                + "} to Stix-Domain-Object {"
-                + id
-                + "}",
+                "Removing External-Reference {" + external_reference_id +
+                "} to Stix-Domain-Object {" + id + "}",
             )
             query = """
                mutation StixDomainObjectRemoveRelation($id: ID!, $toId: String!, $relationship_type: String!) {
@@ -1129,11 +1125,8 @@ class StixDomainObject:
         if id is not None and kill_chain_phase_id is not None:
             self.opencti.log(
                 "info",
-                "Adding Kill-Chain-Phase {"
-                + kill_chain_phase_id
-                + "} to Stix-Domain-Object {"
-                + id
-                + "}",
+                "Adding Kill-Chain-Phase {" + kill_chain_phase_id +
+                "} to Stix-Domain-Object {" + id + "}",
             )
             query = """
                mutation StixDomainObjectAddRelation($id: ID!, $input: StixMetaRelationshipAddInput) {
@@ -1156,7 +1149,8 @@ class StixDomainObject:
             )
             return True
         else:
-            self.opencti.log("error", "Missing parameters: id and kill_chain_phase_id")
+            self.opencti.log("error",
+                             "Missing parameters: id and kill_chain_phase_id")
             return False
 
     """
@@ -1173,11 +1167,8 @@ class StixDomainObject:
         if id is not None and kill_chain_phase_id is not None:
             self.opencti.log(
                 "info",
-                "Removing Kill-Chain-Phase {"
-                + kill_chain_phase_id
-                + "} from Stix-Domain-Object {"
-                + id
-                + "}",
+                "Removing Kill-Chain-Phase {" + kill_chain_phase_id +
+                "} from Stix-Domain-Object {" + id + "}",
             )
             query = """
                mutation StixDomainObjectRemoveRelation($id: ID!, $toId: String!, $relationship_type: String!) {
@@ -1353,8 +1344,7 @@ class StixDomainObject:
              """
             result = self.opencti.query(query, {"id": id})
             processed_result = self.opencti.process_multiple_fields(
-                result["data"]["Stix-Domain-Object"]
-            )
+                result["data"]["Stix-Domain-Object"])
             if processed_result:
                 return processed_result["reports"]
             else:
@@ -1509,8 +1499,7 @@ class StixDomainObject:
              """
             result = self.opencti.query(query, {"id": id})
             processed_result = self.opencti.process_multiple_fields(
-                result["data"]["Stix-Domain-Object"]
-            )
+                result["data"]["Stix-Domain-Object"])
             if processed_result:
                 return processed_result["notes"]
             else:

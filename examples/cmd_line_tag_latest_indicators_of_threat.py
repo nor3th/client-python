@@ -60,9 +60,11 @@ tags = args.tags.split(",")
 operation = args.operation
 
 # Resolve the entity
-threat = opencti_api_client.stix_domain_object.read(
-    types=[entity_type], filters=[{"key": "name", "values": [name]}]
-)
+threat = opencti_api_client.stix_domain_object.read(types=[entity_type],
+                                                    filters=[{
+                                                        "key": "name",
+                                                        "values": [name]
+                                                    }])
 
 if not threat:
     raise ValueError("Cannot find the entity with the name " + name)
@@ -78,7 +80,6 @@ custom_attributes = """
     created_at
 """
 
-
 data = {"pagination": {"hasNextPage": True, "endCursor": None}}
 while data["pagination"]["hasNextPage"]:
     after = data["pagination"]["endCursor"]
@@ -87,9 +88,20 @@ while data["pagination"]["hasNextPage"]:
         after=after,
         customAttributes=custom_attributes,
         filters=[
-            {"key": "indicates", "values": [threat["id"]]},
-            {"key": "created_at", "values": [created_after], "operator": "gt"},
-            {"key": "created_at", "values": [created_before], "operator": "lt"},
+            {
+                "key": "indicates",
+                "values": [threat["id"]]
+            },
+            {
+                "key": "created_at",
+                "values": [created_after],
+                "operator": "gt"
+            },
+            {
+                "key": "created_at",
+                "values": [created_before],
+                "operator": "lt"
+            },
         ],
         orderBy="created_at",
         orderMode="asc",
@@ -100,10 +112,8 @@ while data["pagination"]["hasNextPage"]:
         if operation == "add":
             for label in labels:
                 opencti_api_client.stix_domain_object.add_label(
-                    id=indicator["id"], label_id=label["id"]
-                )
+                    id=indicator["id"], label_id=label["id"])
         elif operation == "remove":
             for label in labels:
                 opencti_api_client.stix_domain_object.remove_label(
-                    id=indicator["id"], label_id=label["id"]
-                )
+                    id=indicator["id"], label_id=label["id"])

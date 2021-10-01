@@ -231,17 +231,15 @@ class Opinion:
             first = 100
 
         self.opencti.log(
-            "info", "Listing Opinions with filters " + json.dumps(filters) + "."
-        )
-        query = (
-            """
+            "info",
+            "Listing Opinions with filters " + json.dumps(filters) + ".")
+        query = ("""
             query Opinions($filters: [OpinionsFiltering], $search: String, $first: Int, $after: ID, $orderBy: OpinionsOrdering, $orderMode: OrderingMode) {
                 opinions(filters: $filters, search: $search, first: $first, after: $after, orderBy: $orderBy, orderMode: $orderMode) {
                     edges {
                         node {
-                            """
-            + (custom_attributes if custom_attributes is not None else self.properties)
-            + """
+                            """ + (custom_attributes if custom_attributes
+                                   is not None else self.properties) + """
                         }
                     }
                     pageInfo {
@@ -253,8 +251,7 @@ class Opinion:
                     }                    
                 }
             }
-        """
-        )
+        """)
         result = self.opencti.query(
             query,
             {
@@ -284,13 +281,13 @@ class Opinion:
                         "orderMode": order_mode,
                     },
                 )
-                data = self.opencti.process_multiple(result["data"]["opinions"])
+                data = self.opencti.process_multiple(
+                    result["data"]["opinions"])
                 final_data = final_data + data
             return final_data
         else:
-            return self.opencti.process_multiple(
-                result["data"]["opinions"], with_pagination
-            )
+            return self.opencti.process_multiple(result["data"]["opinions"],
+                                                 with_pagination)
 
     """
         Read a Opinion object
@@ -306,23 +303,17 @@ class Opinion:
         custom_attributes = kwargs.get("customAttributes", None)
         if id is not None:
             self.opencti.log("info", "Reading Opinion {" + id + "}.")
-            query = (
-                """
+            query = ("""
                 query Opinion($id: String!) {
                     opinion(id: $id) {
-                        """
-                + (
-                    custom_attributes
-                    if custom_attributes is not None
-                    else self.properties
-                )
-                + """
+                        """ + (custom_attributes if custom_attributes
+                               is not None else self.properties) + """
                     }
                 }
-            """
-            )
+            """)
             result = self.opencti.query(query, {"id": id})
-            return self.opencti.process_multiple_fields(result["data"]["opinion"])
+            return self.opencti.process_multiple_fields(
+                result["data"]["opinion"])
         elif filters is not None:
             result = self.list(filters=filters)
             if len(result) > 0:
@@ -339,16 +330,13 @@ class Opinion:
     def contains_stix_object_or_stix_relationship(self, **kwargs):
         id = kwargs.get("id", None)
         stix_object_or_stix_relationship_id = kwargs.get(
-            "stixObjectOrStixRelationshipId", None
-        )
+            "stixObjectOrStixRelationshipId", None)
         if id is not None and stix_object_or_stix_relationship_id is not None:
             self.opencti.log(
                 "info",
-                "Checking StixObjectOrStixRelationship {"
-                + stix_object_or_stix_relationship_id
-                + "} in Opinion {"
-                + id
-                + "}",
+                "Checking StixObjectOrStixRelationship {" +
+                stix_object_or_stix_relationship_id + "} in Opinion {" + id +
+                "}",
             )
             query = """
                 query OpinionContainsStixObjectOrStixRelationship($id: String!, $stixObjectOrStixRelationshipId: String!) {
@@ -358,11 +346,14 @@ class Opinion:
             result = self.opencti.query(
                 query,
                 {
-                    "id": id,
-                    "stixObjectOrStixRelationshipId": stix_object_or_stix_relationship_id,
+                    "id":
+                    id,
+                    "stixObjectOrStixRelationshipId":
+                    stix_object_or_stix_relationship_id,
                 },
             )
-            return result["data"]["opinionContainsStixObjectOrStixRelationship"]
+            return result["data"][
+                "opinionContainsStixObjectOrStixRelationship"]
         else:
             self.opencti.log(
                 "error",
@@ -427,7 +418,8 @@ class Opinion:
                     }
                 },
             )
-            return self.opencti.process_multiple_fields(result["data"]["opinionAdd"])
+            return self.opencti.process_multiple_fields(
+                result["data"]["opinionAdd"])
         else:
             self.opencti.log(
                 "error",
@@ -445,21 +437,18 @@ class Opinion:
     def add_stix_object_or_stix_relationship(self, **kwargs):
         id = kwargs.get("id", None)
         stix_object_or_stix_relationship_id = kwargs.get(
-            "stixObjectOrStixRelationshipId", None
-        )
+            "stixObjectOrStixRelationshipId", None)
         if id is not None and stix_object_or_stix_relationship_id is not None:
             if self.contains_stix_object_or_stix_relationship(
-                id=id,
-                stixObjectOrStixRelationshipId=stix_object_or_stix_relationship_id,
+                    id=id,
+                    stixObjectOrStixRelationshipId=stix_object_or_stix_relationship_id,
             ):
                 return True
             self.opencti.log(
                 "info",
-                "Adding StixObjectOrStixRelationship {"
-                + stix_object_or_stix_relationship_id
-                + "} to Opinion {"
-                + id
-                + "}",
+                "Adding StixObjectOrStixRelationship {" +
+                stix_object_or_stix_relationship_id + "} to Opinion {" + id +
+                "}",
             )
             query = """
                mutation OpinionEdit($id: ID!, $input: StixMetaRelationshipAddInput) {
@@ -499,16 +488,13 @@ class Opinion:
     def remove_stix_object_or_stix_relationship(self, **kwargs):
         id = kwargs.get("id", None)
         stix_object_or_stix_relationship_id = kwargs.get(
-            "stixObjectOrStixRelationshipId", None
-        )
+            "stixObjectOrStixRelationshipId", None)
         if id is not None and stix_object_or_stix_relationship_id is not None:
             self.opencti.log(
                 "info",
-                "Removing StixObjectOrStixRelationship {"
-                + stix_object_or_stix_relationship_id
-                + "} to Opinion {"
-                + id
-                + "}",
+                "Removing StixObjectOrStixRelationship {" +
+                stix_object_or_stix_relationship_id + "} to Opinion {" + id +
+                "}",
             )
             query = """
                mutation OpinionEditRelationDelete($id: ID!, $toId: String!, $relationship_type: String!) {
@@ -530,8 +516,8 @@ class Opinion:
             return True
         else:
             self.opencti.log(
-                "error", "[opencti_opinion] Missing parameters: id and entity_id"
-            )
+                "error",
+                "[opencti_opinion] Missing parameters: id and entity_id")
             return False
 
     """
@@ -549,39 +535,35 @@ class Opinion:
             return self.create(
                 stix_id=stix_object["id"],
                 createdBy=extras["created_by_id"]
-                if "created_by_id" in extras
-                else None,
+                if "created_by_id" in extras else None,
                 objectMarking=extras["object_marking_ids"]
-                if "object_marking_ids" in extras
-                else None,
+                if "object_marking_ids" in extras else None,
                 objectLabel=extras["object_label_ids"]
-                if "object_label_ids" in extras
-                else None,
+                if "object_label_ids" in extras else None,
                 externalReferences=extras["external_references_ids"]
-                if "external_references_ids" in extras
-                else None,
-                revoked=stix_object["revoked"] if "revoked" in stix_object else None,
+                if "external_references_ids" in extras else None,
+                revoked=stix_object["revoked"]
+                if "revoked" in stix_object else None,
                 confidence=stix_object["confidence"]
-                if "confidence" in stix_object
-                else None,
+                if "confidence" in stix_object else None,
                 lang=stix_object["lang"] if "lang" in stix_object else None,
-                created=stix_object["created"] if "created" in stix_object else None,
-                modified=stix_object["modified"] if "modified" in stix_object else None,
+                created=stix_object["created"]
+                if "created" in stix_object else None,
+                modified=stix_object["modified"]
+                if "modified" in stix_object else None,
                 explanation=self.opencti.stix2.convert_markdown(
-                    stix_object["explanation"]
-                )
-                if "explanation" in stix_object
-                else None,
-                authors=self.opencti.stix2.convert_markdown(stix_object["authors"])
-                if "authors" in stix_object
-                else None,
+                    stix_object["explanation"])
+                if "explanation" in stix_object else None,
+                authors=self.opencti.stix2.convert_markdown(
+                    stix_object["authors"])
+                if "authors" in stix_object else None,
                 x_opencti_stix_ids=stix_object["x_opencti_stix_ids"]
-                if "x_opencti_stix_ids" in stix_object
-                else None,
-                opinion=stix_object["opinion"] if "opinion" in stix_object else None,
+                if "x_opencti_stix_ids" in stix_object else None,
+                opinion=stix_object["opinion"]
+                if "opinion" in stix_object else None,
                 update=update,
             )
         else:
             self.opencti.log(
-                "error", "[opencti_attack_pattern] Missing parameters: stixObject"
-            )
+                "error",
+                "[opencti_attack_pattern] Missing parameters: stixObject")

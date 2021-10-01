@@ -1,14 +1,16 @@
 from pycti.utils.constants import (
-    StixCyberObservableTypes,
+    ContainerTypes,
     IdentityTypes,
     LocationTypes,
-    ContainerTypes,
+    StixCyberObservableTypes,
 )
 
 
 def test_for_enum_typos():
     # Test check for typos between enum names and values
-    enums = [StixCyberObservableTypes, LocationTypes, IdentityTypes, ContainerTypes]
+    enums = [
+        StixCyberObservableTypes, LocationTypes, IdentityTypes, ContainerTypes
+    ]
     for enum in enums:
         for data in enum:
             name = data.name.replace("_", "-")
