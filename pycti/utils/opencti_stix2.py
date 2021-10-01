@@ -5,7 +5,7 @@ import datetime
 import json
 import os
 import uuid
-from typing import List, Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import datefinder
 import dateutil.parser
