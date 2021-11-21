@@ -25,7 +25,9 @@ class ExternalImportConnectorv2(ExternalImportConnector, HttpMixin):
         ] = "https://github.com/oasis-open/cti-stix-common-objects/raw/main/objects/marking-definition/marking-definition--62fd3f9b-15f3-4ebc-802c-91fce9536bcf.json"
 
     def test_teardown(self, api_client):
-        api_client.marking_definition.delete(id="marking-definition--62fd3f9b-15f3-4ebc-802c-91fce9536bcf")
+        api_client.marking_definition.delete(
+            id="marking-definition--62fd3f9b-15f3-4ebc-802c-91fce9536bcf"
+        )
 
     def _run(self):
         self.logger.info(self.config.app.url)
@@ -52,7 +54,9 @@ class ImportReportFileConnectorv2(InternalImportFileConnector):
         )
 
     def test_teardown(self, api_client):
-        api_client.stix_domain_object.delete(id="location--011a9d8e-75eb-475a-a861-6998e9968287")
+        api_client.stix_domain_object.delete(
+            id="location--011a9d8e-75eb-475a-a861-6998e9968287"
+        )
 
     def _run(self, data: Dict) -> str:
         file_content = self._download_import_file(data)

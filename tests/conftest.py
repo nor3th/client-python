@@ -27,11 +27,13 @@ def httpserver_listen_address():
 
 @fixture(scope="session")
 def rabbit_mq_config():
-    return {'host': 'rabbitmq',
-            'pass': '11111111111',
-            'port': 5672,
-            'use_ssl': False,
-            'user': '2222222222222'}
+    return {
+        "host": "rabbitmq",
+        "pass": "11111111111",
+        "port": 5672,
+        "use_ssl": False,
+        "user": "2222222222222",
+    }
 
 
 def pytest_addoption(parser):

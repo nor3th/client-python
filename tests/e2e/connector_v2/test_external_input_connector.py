@@ -2,7 +2,10 @@ import os
 import uuid
 import pytest
 from pytest_cases import parametrize_with_cases, fixture
-from tests.e2e.support_cases.connectors_v2 import TestExternalImportConnectors, TestInternalImportFileConnectors
+from tests.e2e.support_cases.connectors_v2 import (
+    TestExternalImportConnectors,
+    TestInternalImportFileConnectors,
+)
 from tests.utils import get_new_work_id
 
 
@@ -27,7 +30,6 @@ def external_import_connector(api_client, connector):
     os.environ[
         "APP_URL"
     ] = "https://github.com/oasis-open/cti-stix-common-objects/raw/main/objects/marking-definition/marking-definition--62fd3f9b-15f3-4ebc-802c-91fce9536bcf.json"
-
 
     connector = connector()
     connector.test_setup(api_client)
@@ -92,6 +94,7 @@ def import_file_connector(api_client, connector):
 
     connector.stop()
     connector.test_teardown(api_client)
+
 
 @pytest.mark.connectors
 def test_import_file_verify(api_client, import_file_connector):
